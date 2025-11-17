@@ -1,0 +1,198 @@
+<!-- HEADER -->
+<%- include('partials/_header'); %>
+<!-- NAVBAR -->
+<%- include('partials/_navbar'); %>
+    
+    <section class="hero-wrap hero-wrap-2 js-fullheight" style="background-image: url('/images/bg_3.jpg');" data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row no-gutters slider-text js-fullheight align-items-end justify-content-start">
+          <div class="col-md-9 ftco-animate pb-5">
+          	<p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Cars <i class="ion-ios-arrow-forward"></i></span></p>
+            <h1 class="mb-3 bread">Choose Your Car</h1>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH AND FILTERS -->
+    <section class="ftco-section bg-light" style="padding-top: 3em;">
+    	<div class="container">
+    		<div class="row justify-content-center mb-5">
+    			<div class="col-md-12">
+    				<div class="search-wrap bg-white p-4 rounded shadow-sm">
+    					<h3 class="mb-4 text-center">Find Your Perfect Car</h3>
+    					<form action="/cars" method="GET">
+    						<div class="row">
+    							<!-- Search Input with Icon -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-search mr-1"></i> Search
+    									</label>
+    									<input type="text"
+    										   name="search"
+    										   class="form-control"
+    										   placeholder="e.g., Honda, Toyota, BMW..."
+    										   value="<%= filters.search %>"
+    										   style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    								</div>
+    							</div>
+
+    							<!-- Type Filter with Icon -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-car mr-1"></i> Car Type
+    									</label>
+    									<select name="type"
+    											class="form-control"
+    											style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    										<option value="">All Types</option>
+    										<% carTypes.forEach(function(ct) { %>
+    											<option value="<%= ct.type_name %>" <%= filters.type === ct.type_name ? 'selected' : '' %>>
+    												<%= ct.type_name %>
+    											</option>
+    										<% }); %>
+    									</select>
+    								</div>
+    							</div>
+
+    							<!-- Location Filter with Icon -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-pin mr-1"></i> Location
+    									</label>
+    									<select name="location"
+    											class="form-control"
+    											style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    										<option value="">Any Location</option>
+    										<% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+    											<% locations.forEach(function(loc) { %>
+    												<option value="<%= loc.location_id %>" <%= filters.location == loc.location_id ? 'selected' : '' %>>
+    													<%= loc.name %>
+    												</option>
+    											<% }); %>
+    										<% } %>
+    									</select>
+    								</div>
+    							</div>
+
+    							<!-- Price Range with Icon -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-cash mr-1"></i> Price Range ($/day)
+    									</label>
+    									<div class="row">
+    										<div class="col-6">
+    											<input type="number"
+    												   name="minPrice"
+    												   class="form-control"
+    												   placeholder="Min"
+    												   value="<%= filters.minPrice %>"
+    												   min="0"
+    												   style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    										</div>
+    										<div class="col-6">
+    											<input type="number"
+    												   name="maxPrice"
+    												   class="form-control"
+    												   placeholder="Max"
+    												   value="<%= filters.maxPrice %>"
+    												   min="0"
+    												   style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    										</div>
+    									</div>
+    								</div>
+    							</div>
+    						</div>
+
+    						<div class="row">
+    							<!-- Pick-up Date -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-calendar mr-1"></i> Pick-up Date
+    									</label>
+    									<input type="date"
+    										   name="pickupDate"
+    										   class="form-control"
+    										   value="<%= filters.pickupDate %>"
+    										   style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    								</div>
+    							</div>
+
+    							<!-- Drop-off Date -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-calendar mr-1"></i> Drop-off Date
+    									</label>
+    									<input type="date"
+    										   name="dropoffDate"
+    										   class="form-control"
+    										   value="<%= filters.dropoffDate %>"
+    										   style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    								</div>
+    							</div>
+
+    							<!-- Sort By -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold" style="font-size: 13px; color: #1089ff;">
+    										<i class="ion-ios-swap mr-1"></i> Sort By
+    									</label>
+    									<select name="sortBy"
+    											class="form-control"
+    											style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
+    										<option value="newest" <%= filters.sortBy === 'newest' ? 'selected' : '' %>>Newest First</option>
+    										<option value="price_low" <%= filters.sortBy === 'price_low' ? 'selected' : '' %>>Price: Low to High</option>
+    										<option value="price_high" <%= filters.sortBy === 'price_high' ? 'selected' : '' %>>Price: High to Low</option>
+    										<option value="year_new" <%= filters.sortBy === 'year_new' ? 'selected' : '' %>>Year: Newest</option>
+    										<option value="year_old" <%= filters.sortBy === 'year_old' ? 'selected' : '' %>>Year: Oldest</option>
+    									</select>
+    								</div>
+    							</div>
+
+    							<!-- Buttons -->
+    							<div class="col-md-3 mb-3">
+    								<div class="form-group">
+    									<label class="font-weight-bold d-block" style="font-size: 13px; color: transparent;">Actions</label>
+    									<div class="d-flex">
+    										<a href="/cars" class="btn btn-outline-secondary mr-2 flex-grow-1" style="padding: 12px; border-radius: 5px;">
+    											<i class="ion-ios-refresh"></i>
+    										</a>
+    										<button type="submit" class="btn btn-primary flex-grow-1" style="padding: 12px; border-radius: 5px;">
+    											<i class="ion-ios-search mr-1"></i> Search
+    										</button>
+    									</div>
+    								</div>
+    							</div>
+    						</div>
+
+    						<!-- Results count with better styling -->
+    						<div class="row mt-3">
+    							<div class="col-md-12">
+    								<div class="alert alert-info mb-0" style="background-color: #e7f3ff; border: none; border-left: 4px solid #1089ff;">
+    									<i class="ion-ios-information-circle mr-2"></i>
+    									<strong>Found <%= totalCars %> car<%= totalCars !== 1 ? 's' : '' %></strong>
+    									- Showing <%= cars.length %> on this page
+    								</div>
+    							</div>
+    						</div>
+    					</form>
+    				</div>
+    			</div>
+    		</div>
+
+		    <!-- WHAT WE OFFER -->
+			<%- include('partials/_whatweoffer'); %>
+
+		</div>
+    </section>
+    
+
+<!-- FOOTER -->
+<%- include('partials/_footer'); %>

@@ -43,7 +43,9 @@ export default function RentalFlow({ carId }) {
         } else {
             // If either is missing, user is not logged in
             sessionStorage.clear();
-            window.location.href = '/'; // Redirect to login
+            // Save the return URL and redirect to login
+            const returnUrl = window.location.pathname;
+            window.location.href = `/login?return=${encodeURIComponent(returnUrl)}`;
         }
     }, []); // Runs once on mount
 

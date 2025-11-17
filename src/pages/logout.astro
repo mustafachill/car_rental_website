@@ -1,0 +1,33 @@
+---
+// Logout page - clear session and redirect to main site
+if (Astro.cookies) {
+  // Clear all auth cookies
+  Astro.cookies.delete('adminToken', { path: '/' });
+  Astro.cookies.delete('userToken', { path: '/' });
+  Astro.cookies.delete('adminUser', { path: '/' });
+  Astro.cookies.delete('user', { path: '/' });
+}
+
+// Clear localStorage will be done on client side
+---
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Logging out...</title>
+</head>
+<body>
+  <script>
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('user');
+    }
+
+    // Redirect to main site
+    window.location.href = 'http://localhost:3001/';
+  </script>
+  <p>Logging out... Redirecting to <a href="http://localhost:3001/">Prestige Rentals</a>...</p>
+</body>
+</html>

@@ -1,0 +1,37 @@
+---
+// This component displays a sample car grid - can be made dynamic later
+const cars = [
+	{ id: 1, name: 'Mercedes Grand Sedan', brand: 'Chevrolet', price: 500, image: 'car-1.jpg' },
+	{ id: 2, name: 'Range Rover', brand: 'Subaru', price: 500, image: 'car-2.jpg' },
+	{ id: 3, name: 'Mercedes Grand Sedan', brand: 'Chevrolet', price: 500, image: 'car-3.jpg' },
+	{ id: 4, name: 'Mercedes Grand Sedan', brand: 'Chevrolet', price: 500, image: 'car-4.jpg' },
+	{ id: 5, name: 'Range Rover', brand: 'Subaru', price: 500, image: 'car-5.jpg' },
+	{ id: 6, name: 'Mercedes Grand Sedan', brand: 'Chevrolet', price: 500, image: 'car-6.jpg' },
+];
+---
+
+<section class="ftco-section bg-light">
+	<div class="container">
+		<div class="row">
+			{cars.map(car => (
+				<div class="col-md-4">
+					<div class="car-wrap rounded ftco-animate">
+						<div class="img rounded d-flex align-items-end" style={`background-image: url(/template-assets/images/${car.image});`}>
+						</div>
+						<div class="text">
+							<h2 class="mb-0"><a href={`/cars/${car.id}`}>{car.name}</a></h2>
+							<div class="d-flex mb-3">
+								<span class="cat">{car.brand}</span>
+								<p class="price ml-auto">${car.price} <span>/day</span></p>
+							</div>
+							<p class="d-flex mb-0 d-block">
+								<a href="#" class="btn btn-primary py-2 mr-1">Book now</a>
+								<a href={`/cars/${car.id}`} class="btn btn-secondary py-2 ml-1">Details</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			))}
+		</div>
+	</div>
+</section>

@@ -1,0 +1,305 @@
+<!-- HEADER -->
+<%- include('partials/_header'); %>
+<!-- NAVBAR -->
+<%- include('partials/_navbar'); %>
+
+    <section class="hero-wrap hero-wrap-2 js-fullheight" style="background-image: url('images/bg_3.jpg');" data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row no-gutters slider-text js-fullheight align-items-end justify-content-start">
+          <div class="col-md-9 ftco-animate pb-5">
+          	<p class="breadcrumbs"><span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span> <span>Pricing <i class="ion-ios-arrow-forward"></i></span></p>
+            <h1 class="mb-3 bread">Pricing</h1>
+            <p class="text-white">Compare our competitive rates and find the perfect vehicle for your budget</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ftco-section ftco-cart">
+			<div class="container">
+				<!-- Filter Tabs -->
+				<div class="row mb-4">
+					<div class="col-md-12 text-center">
+						<div class="btn-group" role="group">
+							<button class="btn btn-outline-primary filter-btn active" data-filter="all">All Cars</button>
+							<% if (typeof carTypes !== 'undefined' && carTypes.length > 0) { %>
+								<% carTypes.forEach(function(type) { %>
+									<button class="btn btn-outline-primary filter-btn" data-filter="<%= type.type_name %>">
+										<%= type.type_name %>
+									</button>
+								<% }); %>
+							<% } %>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+    			<div class="col-md-12 ftco-animate">
+    				<div class="car-list">
+	    				<table class="table">
+						    <thead class="thead-primary">
+						      <tr class="text-center">
+						        <th>&nbsp;</th>
+						        <th>&nbsp;</th>
+						        <th class="bg-primary heading">Per Hour</th>
+						        <th class="bg-dark heading">Per Day</th>
+						        <th class="bg-black heading">Per Week</th>
+						        <th class="bg-primary heading">Per Month</th>
+						      </tr>
+						    </thead>
+						    <tbody id="carsTableBody">
+						      <% if (typeof cars !== 'undefined' && cars.length > 0) { %>
+						        <% cars.forEach(function(car) { %>
+						          <tr class="car-row" data-type="<%= car.type_name %>">
+						          	<td class="car-image">
+						          		<div class="img" style="background-image:url(<%= car.image_url || 'images/car-1.jpg' %>);"></div>
+						          	</td>
+						            <td class="product-name">
+						            	<h3><%= car.make %> <%= car.model %></h3>
+						            	<p class="mb-1"><small class="text-muted"><%= car.year %> | <%= car.type_name %></small></p>
+						            	<% if (car.mileage) { %>
+						            		<p class="mb-1"><small class="text-muted"><%= car.mileage.toLocaleString() %> miles</small></p>
+						            	<% } %>
+						            	<p class="mb-0 rated">
+						            		<span>rated:</span>
+						            		<%
+						            			const rating = parseFloat(car.average_rating || 0);
+						            			const fullStars = Math.floor(rating);
+						            			const hasHalfStar = rating % 1 >= 0.5;
+						            			for (let i = 1; i <= 5; i++) {
+						            				if (i <= fullStars) {
+						            		%>
+						            			<span class="ion-ios-star"></span>
+						            		<%
+						            				} else if (i === fullStars + 1 && hasHalfStar) {
+						            		%>
+						            			<span class="ion-ios-star-half"></span>
+						            		<%
+						            				} else {
+						            		%>
+						            			<span class="ion-ios-star-outline"></span>
+						            		<%
+						            				}
+						            			}
+						            		%>
+						            		<% if (car.review_count > 0) { %>
+						            			<span class="text-muted">(<%= car.review_count %>)</span>
+						            		<% } %>
+						            	</p>
+						            	<% if (car.features) { %>
+						            		<p class="mb-0 mt-2">
+						            			<small class="text-info">
+						            				<%
+						            					const features = car.features.split(', ');
+						            					const displayFeatures = features.slice(0, 3);
+						            				%>
+						            				<%= displayFeatures.join(', ') %>
+						            				<% if (features.length > 3) { %>
+						            					+<%= features.length - 3 %> more
+						            				<% } %>
+						            			</small>
+						            		</p>
+						            	<% } %>
+						            </td>
+
+						            <!-- Hourly Rate -->
+						            <td class="price">
+						            	<p class="btn-custom"><a href="/car/<%= car.car_id %>">View Details</a></p>
+						            	<div class="price-rate">
+							            	<h3>
+							            		<span class="num"><small class="currency">$</small> <%= car.hourly_rate ? parseFloat(car.hourly_rate).toFixed(2) : 'N/A' %></span>
+							            		<% if (car.hourly_rate) { %>
+							            			<span class="per">/hour</span>
+							            		<% } %>
+							            	</h3>
+							            	<% if (car.hourly_rate) { %>
+							            		<span class="subheading">Flexible hourly rental</span>
+							            	<% } %>
+						            	</div>
+						            </td>
+
+						            <!-- Daily Rate -->
+						            <td class="price">
+						            	<p class="btn-custom"><a href="/car/<%= car.car_id %>">View Details</a></p>
+						            	<div class="price-rate">
+							            	<h3>
+							            		<span class="num"><small class="currency">$</small> <%= parseFloat(car.daily_rate).toFixed(2) %></span>
+							            		<span class="per">/day</span>
+							            	</h3>
+							            	<span class="subheading">Most popular option</span>
+						            	</div>
+						            </td>
+
+						            <!-- Weekly Rate -->
+						            <td class="price">
+						            	<p class="btn-custom"><a href="/car/<%= car.car_id %>">View Details</a></p>
+						            	<div class="price-rate">
+							            	<h3>
+							            		<span class="num"><small class="currency">$</small> <%= car.weekly_rate ? parseFloat(car.weekly_rate).toFixed(2) : 'N/A' %></span>
+							            		<% if (car.weekly_rate) { %>
+							            			<span class="per">/week</span>
+							            		<% } %>
+							            	</h3>
+							            	<% if (car.weekly_rate) { %>
+							            		<span class="subheading">Save with weekly</span>
+							            	<% } %>
+						            	</div>
+						            </td>
+
+						            <!-- Monthly Rate -->
+						            <td class="price">
+						            	<p class="btn-custom"><a href="/car/<%= car.car_id %>">View Details</a></p>
+						            	<div class="price-rate">
+							            	<h3>
+							            		<span class="num"><small class="currency">$</small> <%= car.monthly_rate ? parseFloat(car.monthly_rate).toFixed(2) : 'N/A' %></span>
+							            		<% if (car.monthly_rate) { %>
+							            			<span class="per">/month</span>
+							            		<% } %>
+							            	</h3>
+							            	<% if (car.monthly_rate) { %>
+							            		<span class="subheading">Best value!</span>
+							            	<% } %>
+						            	</div>
+						            </td>
+						          </tr><!-- END TR-->
+						        <% }); %>
+						      <% } else { %>
+						        <tr>
+						          <td colspan="6" class="text-center py-5">
+						            <h4 class="text-muted">No cars available at the moment</h4>
+						            <p>Please check back later or <a href="/contact">contact us</a> for more information.</p>
+						          </td>
+						        </tr>
+						      <% } %>
+						    </tbody>
+						  </table>
+					  </div>
+    			</div>
+    		</div>
+
+    		<!-- Pagination -->
+    		<% if (pagination && pagination.totalPages > 1) { %>
+    		<div class="row mt-4">
+    			<div class="col-md-12">
+    				<div class="d-flex justify-content-between align-items-center">
+    					<div class="text-muted">
+    						Showing page <%= pagination.currentPage %> of <%= pagination.totalPages %>
+    						(<%= pagination.totalCars %> total cars)
+    					</div>
+    					<nav>
+    						<ul class="pagination mb-0">
+    							<!-- Previous Button -->
+    							<li class="page-item <%= pagination.currentPage === 1 ? 'disabled' : '' %>">
+    								<a class="page-link" href="/pricing?page=<%= pagination.currentPage - 1 %>"
+    								   <%= pagination.currentPage === 1 ? 'tabindex="-1"' : '' %>>
+    									Previous
+    								</a>
+    							</li>
+
+    							<!-- Page Numbers -->
+    							<%
+    								const maxVisiblePages = 5;
+    								let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
+    								let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+
+    								if (endPage - startPage < maxVisiblePages - 1) {
+    									startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    								}
+    							%>
+
+    							<!-- First page if not visible -->
+    							<% if (startPage > 1) { %>
+    								<li class="page-item">
+    									<a class="page-link" href="/pricing?page=1">1</a>
+    								</li>
+    								<% if (startPage > 2) { %>
+    									<li class="page-item disabled">
+    										<span class="page-link">...</span>
+    									</li>
+    								<% } %>
+    							<% } %>
+
+    							<!-- Visible page numbers -->
+    							<% for (let i = startPage; i <= endPage; i++) { %>
+    								<li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+    									<a class="page-link" href="/pricing?page=<%= i %>"><%= i %></a>
+    								</li>
+    							<% } %>
+
+    							<!-- Last page if not visible -->
+    							<% if (endPage < pagination.totalPages) { %>
+    								<% if (endPage < pagination.totalPages - 1) { %>
+    									<li class="page-item disabled">
+    										<span class="page-link">...</span>
+    									</li>
+    								<% } %>
+    								<li class="page-item">
+    									<a class="page-link" href="/pricing?page=<%= pagination.totalPages %>">
+    										<%= pagination.totalPages %>
+    									</a>
+    								</li>
+    							<% } %>
+
+    							<!-- Next Button -->
+    							<li class="page-item <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>">
+    								<a class="page-link" href="/pricing?page=<%= pagination.currentPage + 1 %>"
+    								   <%= pagination.currentPage === pagination.totalPages ? 'tabindex="-1"' : '' %>>
+    									Next
+    								</a>
+    							</li>
+    						</ul>
+    					</nav>
+    				</div>
+    			</div>
+    		</div>
+    		<% } %>
+
+    		<!-- Additional Info Section -->
+    		<div class="row mt-5">
+    			<div class="col-md-12">
+    				<div class="alert alert-info">
+    					<h5><strong>Note:</strong> Pricing Information</h5>
+    					<ul class="mb-0">
+    						<li>All prices are in USD and subject to availability</li>
+    						<li>Prices include basic insurance coverage</li>
+    						<li>Fuel costs are not included - vehicles are rented with a full tank and should be returned full</li>
+    						<li>Additional fees may apply for drivers under 25 or additional drivers</li>
+    						<li>Weekly and monthly rates offer significant savings</li>
+    						<li>Click "View Details" to see more information about each vehicle</li>
+    					</ul>
+    				</div>
+    			</div>
+    		</div>
+			</div>
+		</section>
+
+		<!-- Filter Script -->
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				const filterButtons = document.querySelectorAll('.filter-btn');
+				const carRows = document.querySelectorAll('.car-row');
+
+				filterButtons.forEach(button => {
+					button.addEventListener('click', function() {
+						// Update active button
+						filterButtons.forEach(btn => btn.classList.remove('active'));
+						this.classList.add('active');
+
+						const filterValue = this.getAttribute('data-filter');
+
+						// Filter cars
+						carRows.forEach(row => {
+							if (filterValue === 'all' || row.getAttribute('data-type') === filterValue) {
+								row.style.display = '';
+							} else {
+								row.style.display = 'none';
+							}
+						});
+					});
+				});
+			});
+		</script>
+
+<!-- FOOTER -->
+<%- include('partials/_footer'); %>

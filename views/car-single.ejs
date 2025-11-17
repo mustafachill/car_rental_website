@@ -1,0 +1,213 @@
+<!-- HEADER -->
+<%- include('partials/_header'); %>
+<!-- NAVBAR -->
+<%- include('partials/_navbar'); %>
+
+<section class="hero-wrap hero-wrap-2 js-fullheight" style="background-image: url('/images/bg_3.jpg');" data-stellar-background-ratio="0.5">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row no-gutters slider-text js-fullheight align-items-end justify-content-start">
+      <div class="col-md-9 ftco-animate pb-5">
+      	<p class="breadcrumbs">
+      		<span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+      		<span class="mr-2"><a href="/cars">Cars <i class="ion-ios-arrow-forward"></i></a></span>
+      		<span>Car Details <i class="ion-ios-arrow-forward"></i></span>
+      	</p>
+        <h1 class="mb-3 bread"><%= car.make %> <%= car.model %></h1>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ftco-section ftco-car-details">
+  <div class="container">
+  	<div class="row justify-content-center">
+  		<div class="col-md-12">
+  			<div class="car-details">
+  				<div class="img rounded" style="background-image: url('/<%= car.image_url %>');"></div>
+  				<div class="text text-center">
+  					<span class="subheading"><%= car.type_name %></span>
+  					<h2><%= car.make %> <%= car.model %></h2>
+  				</div>
+  			</div>
+  		</div>
+  	</div>
+
+  	<!-- Car Specifications -->
+  	<div class="row">
+  		<div class="col-md d-flex align-self-stretch ftco-animate">
+        <div class="media block-6 services">
+          <div class="media-body py-md-4">
+          	<div class="d-flex mb-3 align-items-center">
+              	<div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-dashboard"></span></div>
+              	<div class="text">
+	                <h3 class="heading mb-0 pl-3">
+	                	Mileage
+	                	<span><%= car.mileage ? car.mileage.toLocaleString() + ' km' : 'N/A' %></span>
+	                </h3>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md d-flex align-self-stretch ftco-animate">
+        <div class="media block-6 services">
+          <div class="media-body py-md-4">
+          	<div class="d-flex mb-3 align-items-center">
+              	<div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-pistons"></span></div>
+              	<div class="text">
+	                <h3 class="heading mb-0 pl-3">
+	                	Year
+	                	<span><%= car.year %></span>
+	                </h3>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md d-flex align-self-stretch ftco-animate">
+        <div class="media block-6 services">
+          <div class="media-body py-md-4">
+          	<div class="d-flex mb-3 align-items-center">
+              	<div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-car"></span></div>
+              	<div class="text">
+	                <h3 class="heading mb-0 pl-3">
+	                	Type
+	                	<span><%= car.type_name %></span>
+	                </h3>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md d-flex align-self-stretch ftco-animate">
+        <div class="media block-6 services">
+          <div class="media-body py-md-4">
+          	<div class="d-flex mb-3 align-items-center">
+              	<div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-rent"></span></div>
+              	<div class="text">
+	                <h3 class="heading mb-0 pl-3">
+	                	Price
+	                	<span>$<%= car.daily_rate %>/day</span>
+	                </h3>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md d-flex align-self-stretch ftco-animate">
+        <div class="media block-6 services">
+          <div class="media-body py-md-4">
+          	<div class="d-flex mb-3 align-items-center">
+              	<div class="icon d-flex align-items-center justify-content-center">
+              		<span class="<%= car.status === 'Available' ? 'flaticon-check' : 'flaticon-prohibited' %>"></span>
+              	</div>
+              	<div class="text">
+	                <h3 class="heading mb-0 pl-3">
+	                	Status
+	                	<span class="<%= car.status === 'Available' ? 'text-success' : 'text-danger' %>">
+	                		<%= car.status %>
+	                	</span>
+	                </h3>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+	<!-- Features Section -->
+	<% if (features && features.length > 0) { %>
+	<div class="row mt-5">
+		<div class="col-md-12">
+			<h3 class="mb-4">Features</h3>
+			<div class="row">
+				<% features.forEach(function(feature) { %>
+					<div class="col-md-4">
+						<p><i class="ion-ios-checkmark text-success"></i> <%= feature.feature_name %></p>
+					</div>
+				<% }); %>
+			</div>
+		</div>
+	</div>
+	<% } %>
+
+	<!-- Reviews Section -->
+	<% if (reviews && reviews.length > 0) { %>
+	<div class="row mt-5">
+		<div class="col-md-12">
+			<h3 class="mb-4"><%= reviews.length %> Reviews</h3>
+			<% reviews.slice(0, 3).forEach(function(review) { %>
+				<div class="review d-flex mb-4">
+					<div class="desc">
+						<h4>
+							<span class="text-left"><%= review.first_name %> <%= review.last_name %></span>
+							<span class="text-right"><%= new Date(review.created_at).toLocaleDateString() %></span>
+						</h4>
+						<p class="star">
+							<% for(let i = 1; i <= 5; i++) { %>
+								<i class="ion-ios-star<%= i <= review.rating ? '' : '-outline' %>"></i>
+							<% } %>
+						</p>
+						<p><%= review.comment %></p>
+					</div>
+				</div>
+			<% }); %>
+		</div>
+	</div>
+	<% } %>
+
+	<!-- Booking Section -->
+	<div class="row mt-5">
+		<div class="col-md-12 text-center">
+			<% if (car.status === 'Available') { %>
+				<a href="http://localhost:4321/customer/rent/<%= car.car_id %>" class="btn btn-primary py-3 px-5">Book This Car</a>
+			<% } else { %>
+				<button class="btn btn-secondary py-3 px-5" disabled>Currently Unavailable</button>
+			<% } %>
+		</div>
+	</div>
+  </div>
+</section>
+
+<!-- Related Cars Section -->
+<% if (relatedCars && relatedCars.length > 0) { %>
+<section class="ftco-section ftco-no-pt bg-light">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-12 heading-section text-center ftco-animate mb-5">
+				<span class="subheading">Choose Car</span>
+				<h2 class="mb-2">Related Cars</h2>
+			</div>
+		</div>
+		<div class="row">
+			<% relatedCars.forEach(function(relatedCar) { %>
+				<div class="col-md-4">
+					<div class="car-wrap rounded ftco-animate">
+						<div class="img rounded d-flex align-items-end" style="background-image: url('/<%= relatedCar.image_url %>');"></div>
+						<div class="text">
+							<h2 class="mb-0">
+								<a href="/car/<%= relatedCar.car_id %>"><%= relatedCar.make %> <%= relatedCar.model %></a>
+							</h2>
+							<div class="d-flex mb-3">
+								<p class="price ml-auto">$<%= relatedCar.daily_rate %> <span>/day</span></p>
+							</div>
+							<p class="d-flex mb-0 d-block">
+								<a href="http://localhost:4321/customer/rent/<%= relatedCar.car_id %>" class="btn btn-primary py-2 mr-1">Book now</a>
+								<a href="/car/<%= relatedCar.car_id %>" class="btn btn-secondary py-2 ml-1">Details</a>
+							</p>
+						</div>
+					</div>
+				</div>
+			<% }); %>
+		</div>
+	</div>
+</section>
+<% } %>
+
+<!-- FOOTER -->
+<%- include('partials/_footer'); %>

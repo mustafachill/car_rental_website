@@ -1,0 +1,168 @@
+<!-- HEADER -->
+<%- include('partials/_header'); %>
+<!-- NAVBAR -->
+<%- include('partials/_navbar'); %>
+    
+
+    <!-- INDEX PAGE -->
+    <div class="hero-wrap ftco-degree-bg" style="background-image: url('images/bg_1.jpg');" data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row no-gutters slider-text justify-content-start align-items-center justify-content-center">
+          <div class="col-lg-8 ftco-animate">
+          	<div class="text w-100 text-center mb-md-5 pb-md-5">
+	            <h1 class="mb-4">Houston's Premier Car Rental Service</h1>
+	            <p style="font-size: 18px;">Experience the freedom of the open road with Prestige Rentals. Quality vehicles, exceptional service, and unbeatable rates for all your Houston transportation needs.</p>
+	            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="icon-wrap popup-youtube d-flex align-items-center mt-4 justify-content-center">
+	            	<div class="icon d-flex align-items-center justify-content-center">
+	            		<span class="ion-ios-play"></span>
+	            	</div>
+	            	<div class="heading-title ml-5">
+		            	<span>Easy steps for renting a car</span>
+	            	</div>
+	            </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+     <section class="ftco-section ftco-no-pt bg-light">
+    	<div class="container">
+    		<div class="row no-gutters">
+    			<div class="col-md-12	featured-top">
+    				<div class="row no-gutters">
+	  					<div class="col-md-4 d-flex align-items-center">
+	  						<form action="/cars" method="GET" class="request-form ftco-animate bg-primary">
+		          		<h2>Find Your Perfect Car</h2>
+
+			    				<!-- Car Type -->
+			    				<div class="form-group">
+			    					<label for="carType" class="label">Car Type</label>
+			    					<select name="type" id="carType" class="form-control">
+			    						<option value="">All Types</option>
+			    						<% if (typeof carTypes !== 'undefined' && carTypes.length > 0) { %>
+			    							<% carTypes.forEach(function(type) { %>
+			    								<option value="<%= type.type_name %>"><%= type.type_name %></option>
+			    							<% }); %>
+			    						<% } %>
+			    					</select>
+			    				</div>
+
+			    				<!-- Location -->
+			    				<div class="form-group">
+			    					<label for="location" class="label">Pick-up Location</label>
+			    					<select name="location" id="location" class="form-control">
+			    						<option value="">Any Location</option>
+			    						<% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+			    							<% locations.forEach(function(loc) { %>
+			    								<option value="<%= loc.location_id %>"><%= loc.name %></option>
+			    							<% }); %>
+			    						<% } %>
+			    					</select>
+			    				</div>
+
+			    				<!-- Price Range -->
+			    				<div class="form-group">
+			    					<label for="" class="label">Price Range ($/day)</label>
+			    					<div class="d-flex">
+			    						<input type="number" name="minPrice" class="form-control mr-2" placeholder="Min" min="0">
+			    						<input type="number" name="maxPrice" class="form-control" placeholder="Max" min="0">
+			    					</div>
+			    				</div>
+
+			    				<!-- Pick-up and Drop-off Dates -->
+			    				<div class="d-flex">
+			    					<div class="form-group mr-2">
+			                <label for="pickupDate" class="label">Pick-up Date</label>
+			                <input type="date" name="pickupDate" class="form-control" id="pickupDate">
+			              </div>
+			              <div class="form-group ml-2">
+			                <label for="dropoffDate" class="label">Drop-off Date</label>
+			                <input type="date" name="dropoffDate" class="form-control" id="dropoffDate">
+			              </div>
+		              </div>
+
+		              <!-- Search Button -->
+			            <div class="form-group">
+			              <input type="submit" value="Search Available Cars" class="btn btn-secondary py-3 px-4">
+			            </div>
+			    			</form>
+	  					</div>
+	  					<div class="col-md-8 d-flex align-items-center">
+	  						<div class="services-wrap w-100 p-4" style="background: white;">
+	  							<h3 class="heading-section mb-3" style="font-size: 28px; font-weight: 700; color: #333;">Simple Steps to Your Dream Ride</h3>
+	  							<p class="mb-4" style="font-size: 15px; color: #666;">Experience hassle-free car rental in just three easy steps</p>
+	  							<div class="row d-flex mb-4">
+					          <div class="col-md-4 d-flex align-self-stretch ftco-animate">
+					            <div class="services w-100 text-center p-3" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+				              	<div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background: #1089ff; margin: 0 auto;">
+				              		<span class="flaticon-route" style="font-size: 32px; color: white;"></span>
+				              	</div>
+				              	<div class="text w-100">
+					                <h3 class="heading mb-2" style="font-size: 18px; font-weight: 600; color: #333;">Choose Location</h3>
+					                <p style="font-size: 13px; color: #666; margin: 0;">Select your preferred pickup point</p>
+				                </div>
+					            </div>
+					          </div>
+					          <div class="col-md-4 d-flex align-self-stretch ftco-animate">
+					            <div class="services w-100 text-center p-3" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+				              	<div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background: #1089ff; margin: 0 auto;">
+				              		<span class="flaticon-handshake" style="font-size: 32px; color: white;"></span>
+				              	</div>
+				              	<div class="text w-100">
+					                <h3 class="heading mb-2" style="font-size: 18px; font-weight: 600; color: #333;">Pick Your Car</h3>
+					                <p style="font-size: 13px; color: #666; margin: 0;">Browse and select the best deal</p>
+					              </div>
+					            </div>
+					          </div>
+					          <div class="col-md-4 d-flex align-self-stretch ftco-animate">
+					            <div class="services w-100 text-center p-3" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+				              	<div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background: #1089ff; margin: 0 auto;">
+				              		<span class="flaticon-rent" style="font-size: 32px; color: white;"></span>
+				              	</div>
+				              	<div class="text w-100">
+					                <h3 class="heading mb-2" style="font-size: 18px; font-weight: 600; color: #333;">Book & Drive</h3>
+					                <p style="font-size: 13px; color: #666; margin: 0;">Reserve instantly and hit the road</p>
+					              </div>
+					            </div>
+					          </div>
+					        </div>
+
+					        <div class="text-center mt-4">
+					        	<a href="/cars" class="btn btn-primary py-3 px-5" style="font-weight: 600;">
+					        		Browse All Available Cars
+					        		<span class="ion-ios-arrow-forward ml-2"></span>
+					        	</a>
+					        </div>
+	  						</div>
+	  					</div>
+	  				</div>
+				</div>
+  		</div>
+    </section>
+
+    <!-- ABOUT -->
+    <%- include('partials/_about'); %>
+
+	<!-- SERVICES -->
+    <%- include('partials/_services'); %>
+
+    <!-- FRAG -->
+    <%- include('partials/_frag'); %>
+
+    <!-- TESTIMONIALS -->
+    <%- include('partials/_testimonials'); %>
+    
+    <!-- BLOG -->
+    <%- include('partials/_blog'); %>
+    
+    <!-- Experience -->
+    <%- include('partials/_experience'); %>
+
+    <!-- Contact -->
+    <%- include('partials/_contact'); %>
+
+<!-- FOOTER -->
+<%- include('partials/_footer'); %>
+    

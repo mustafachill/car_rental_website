@@ -1,0 +1,1338 @@
+-- This code is used to create and insert entries into a car rental database. The code will first set up the database and relational tables, then the tables will be
+-- filled with 25 sample entries that have been randomly generated based on the parameters of the schema and relational data.
+
+-- Drop existing tables if they exist to prevent errors on re-run
+DROP TABLE IF EXISTS `car_rental_db`.`Payments`;
+DROP TABLE IF EXISTS `car_rental_db`.`Maintenance`;
+DROP TABLE IF EXISTS `car_rental_db`.`Rentals`;
+DROP TABLE IF EXISTS `car_rental_db`.`Customers`;
+DROP TABLE IF EXISTS `car_rental_db`.`Employees`;
+DROP TABLE IF EXISTS `car_rental_db`.`Cars`;
+DROP TABLE IF EXISTS `car_rental_db`.`Car_Types`;
+
+-- Schema car_rental_db
+CREATE SCHEMA IF NOT EXISTS `car_rental_db` DEFAULT CHARACTER SET utf8mb4 ;
+USE `car_rental_db` ;
+
+
+-- Table `car_rental_db`.`Car_Types`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Car_Types` (
+  `car_type_id` INT NOT NULL AUTO_INCREMENT,
+  `type_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`car_type_id`),
+  UNIQUE INDEX `type_name_UNIQUE` (`type_name` ASC))
+ENGINE = InnoDB;
+
+
+-- Table `car_rental_db`.`Cars`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Cars` (
+  `car_id` INT NOT NULL AUTO_INCREMENT,
+  `make` VARCHAR(45) NOT NULL,
+  `model` VARCHAR(45) NOT NULL,
+  `year` INT NOT NULL,
+  `license_plate` VARCHAR(45) NOT NULL,
+  `daily_rate` DECIMAL(10,2) NOT NULL,
+  `car_type_id` INT NOT NULL,
+  `current_location` VARCHAR(255) NULL,
+  `status` VARCHAR(45) NOT NULL,
+  `image_path` VARCHAR(255) NULL,
+  `mileage` INT NULL,
+  `purchase_date` DATE NULL,
+  `previous_owners` VARCHAR(255) NULL,
+  PRIMARY KEY (`car_id`),
+  UNIQUE INDEX `license_plate_UNIQUE` (`license_plate` ASC),
+  INDEX `fk_Cars_Car_Types1_idx` (`car_type_id` ASC),
+  CONSTRAINT `fk_Cars_Car_Types1`
+    FOREIGN KEY (`car_type_id`)
+    REFERENCES `car_rental_db`.`Car_Types` (`car_type_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- Table `car_rental_db`.`Customers`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Customers` (
+  `customer_id` INT NOT NULL AUTO_INCREMENT,
+  `first_name` VARCHAR(45) NOT NULL,
+  `last_name` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `phone_number` VARCHAR(20) NULL,
+  `address` VARCHAR(255) NULL,
+  `city` VARCHAR(45) NULL,
+  `state` VARCHAR(45) NULL,
+  `zip_code` VARCHAR(10) NULL,
+  `date_of_birth` DATE NULL,
+  `password` VARCHAR(255) NULL,
+  PRIMARY KEY (`customer_id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC))
+ENGINE = InnoDB;
+
+
+-- Table `car_rental_db`.`Employees`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Employees` (
+  `employee_id` INT NOT NULL AUTO_INCREMENT,
+  `first_name` VARCHAR(45) NOT NULL,
+  `last_name` VARCHAR(45) NOT NULL,
+  `job_title` VARCHAR(45) NULL,
+  `hire_date` DATE NULL,
+  `email` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`employee_id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC))
+ENGINE = InnoDB;
+
+
+-- Table `car_rental_db`.`Rentals`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Rentals` (
+  `rental_id` INT NOT NULL AUTO_INCREMENT,
+  `customer_id` INT NOT NULL,
+  `car_id` INT NOT NULL,
+  `pickup_date` DATE NOT NULL,
+  `return_date` DATE NULL,
+  `total_cost` DECIMAL(10,2) NULL,
+  `late_fee` DECIMAL(10,2) NULL,
+  PRIMARY KEY (`rental_id`),
+  INDEX `fk_Rentals_Customers_idx` (`customer_id` ASC),
+  INDEX `fk_Rentals_Cars1_idx` (`car_id` ASC),
+  CONSTRAINT `fk_Rentals_Customers`
+    FOREIGN KEY (`customer_id`)
+    REFERENCES `car_rental_db`.`Customers` (`customer_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Rentals_Cars1`
+    FOREIGN KEY (`car_id`)
+    REFERENCES `car_rental_db`.`Cars` (`car_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- Table `car_rental_db`.`Payments`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Payments` (
+  `payment_id` INT NOT NULL AUTO_INCREMENT,
+  `rental_id` INT NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `payment_date` DATE NOT NULL,
+  `payment_method` VARCHAR(45) NULL,
+  PRIMARY KEY (`payment_id`),
+  INDEX `fk_Payments_Rentals1_idx` (`rental_id` ASC),
+  CONSTRAINT `fk_Payments_Rentals1`
+    FOREIGN KEY (`rental_id`)
+    REFERENCES `car_rental_db`.`Rentals` (`rental_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+-- Table `car_rental_db`.`Maintenance`
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Maintenance` (
+  `maintenance_id` INT NOT NULL AUTO_INCREMENT,
+  `car_id` INT NOT NULL,
+  `service_date` DATE NOT NULL,
+  `service_type` VARCHAR(100) NOT NULL,
+  `cost` DECIMAL(10,2) NULL,
+  `notes` TEXT NULL,
+  PRIMARY KEY (`maintenance_id`),
+  INDEX `fk_Maintenance_Cars1_idx` (`car_id` ASC),
+  CONSTRAINT `fk_Maintenance_Cars1`
+    FOREIGN KEY (`car_id`)
+    REFERENCES `car_rental_db`.`Cars` (`car_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+
+-- Data for table `car_rental_db`.`Car_Types`
+INSERT INTO `car_rental_db`.`Car_Types` (`car_type_id`, `type_name`) VALUES
+(1, 'Sedan'),
+(2, 'SUV'),
+(3, 'Truck'),
+(4, 'Convertible'),
+(5, 'Van');
+
+
+-- Data for table `car_rental_db`.`Customers`
+INSERT INTO `car_rental_db`.`Customers` (`customer_id`, `first_name`, `last_name`, `email`, `phone_number`, `address`, `city`, `state`, `zip_code`, `date_of_birth`) VALUES
+(1, 'John', 'Doe', 'john.doe@example.com', '555-123-4567', '123 Maple St', 'Anytown', 'CA', '90210', '1985-05-15'),
+(2, 'Jane', 'Smith', 'jane.smith@example.com', '555-987-6543', '456 Oak Ave', 'Otherville', 'NY', '10001', '1990-11-20'),
+(3, 'Peter', 'Jones', 'peter.jones@example.com', '555-555-5555', '789 Pine Rd', 'Sometown', 'TX', '75001', '1978-02-28'),
+(4, 'Mary', 'Johnson', 'mary.johnson@example.com', '555-222-3333', '101 Elm Blvd', 'Anotherplace', 'FL', '33101', '1995-07-04'),
+(5, 'Michael', 'Brown', 'michael.brown@example.com', '555-444-5555', '202 Birch Ln', 'Hometown', 'GA', '30303', '1980-09-10'),
+(6, 'Jessica', 'Davis', 'jessica.davis@example.com', '555-666-7777', '303 Cedar Dr', 'Villageton', 'WA', '98101', '1992-03-12'),
+(7, 'David', 'Miller', 'david.miller@example.com', '555-888-9999', '404 Spruce Ct', 'Cityville', 'IL', '60601', '1988-12-01'),
+(8, 'Sarah', 'Wilson', 'sarah.wilson@example.com', '555-111-2222', '505 Poplar Ave', 'Ruralton', 'AZ', '85001', '1975-06-25'),
+(9, 'Chris', 'Taylor', 'chris.taylor@example.com', '555-333-4444', '606 Willow St', 'Suburbia', 'CO', '80202', '1998-01-08'),
+(10, 'Jennifer', 'Moore', 'jennifer.moore@example.com', '555-777-8888', '707 Aspen Rd', 'Bigtown', 'PA', '19101', '1983-10-30'),
+(11, 'William', 'Clark', 'william.clark@example.com', '555-999-0000', '808 Cherry Ln', 'Metropolis', 'OH', '43201', '1987-04-18'),
+(12, 'Amanda', 'Lewis', 'amanda.lewis@example.com', '555-000-1111', '909 Magnolia Dr', 'Smallville', 'MI', '48201', '1994-08-22'),
+(13, 'James', 'Hall', 'james.hall@example.com', '555-123-4444', '111 Sycamore Ct', 'Oakwood', 'VA', '22201', '1970-01-15'),
+(14, 'Elizabeth', 'Allen', 'elizabeth.allen@example.com', '555-234-5678', '222 Holly Blvd', 'Pineville', 'MD', '20701', '1991-05-09'),
+(15, 'Ryan', 'Young', 'ryan.young@example.com', '555-345-6789', '333 Elm St', 'Riverton', 'NV', '89101', '1986-09-02'),
+(16, 'Nicole', 'Hernandez', 'nicole.hernandez@example.com', '555-456-7890', '444 Oak St', 'Mountainville', 'ID', '83701', '1997-12-28'),
+(17, 'Daniel', 'King', 'daniel.king@example.com', '555-567-8901', '555 Cedar Rd', 'Lakeview', 'UT', '84101', '1984-03-10'),
+(18, 'Lauren', 'Wright', 'lauren.wright@example.com', '555-678-9012', '666 Birch Ln', 'Hillside', 'NM', '87101', '1996-06-14'),
+(19, 'Kevin', 'Lopez', 'kevin.lopez@example.com', '555-789-0123', '777 Pine Ave', 'Valleymeadow', 'KS', '66001', '1979-04-05'),
+(20, 'Melissa', 'Hill', 'melissa.hill@example.com', '555-890-1234', '888 Spruce St', 'Plainstown', 'NE', '68501', '1993-11-29'),
+(21, 'Andrew', 'Scott', 'andrew.scott@example.com', '555-901-2345', '999 Poplar Rd', 'Foreston', 'SC', '29201', '1982-08-11'),
+(22, 'Stephanie', 'Green', 'stephanie.green@example.com', '555-012-3456', '121 Willow Ln', 'Beachburg', 'NC', '27501', '1990-02-17'),
+(23, 'Joshua', 'Adams', 'joshua.adams@example.com', '555-123-4567', '232 Aspen Dr', 'Harbortown', 'LA', '70112', '1989-07-23'),
+(24, 'Samantha', 'Baker', 'samantha.baker@example.com', '555-234-5678', '343 Cherry St', 'Portsville', 'MS', '39201', '1999-04-01'),
+(25, 'Justin', 'Carter', 'justin.carter@example.com', '555-345-6789', '454 Magnolia Ave', 'Springfield', 'TN', '37201', '1987-10-06');
+
+
+-- Data for table `car_rental_db`.`Employees`
+INSERT INTO `car_rental_db`.`Employees` (`employee_id`, `first_name`, `last_name`, `job_title`, `hire_date`, `email`) VALUES
+(1, 'Emily', 'Clark', 'Manager', '2019-03-10', 'emily.clark@carrental.com'),
+(2, 'Lucas', 'Rodriguez', 'Sales Agent', '2020-05-22', 'lucas.rodriguez@carrental.com'),
+(3, 'Olivia', 'Harris', 'Sales Agent', '2021-01-15', 'olivia.harris@carrental.com'),
+(4, 'Noah', 'Martin', 'Mechanic', '2018-08-01', 'noah.martin@carrental.com'),
+(5, 'Ava', 'Young', 'Sales Agent', '2022-04-19', 'ava.young@carrental.com'),
+(6, 'Benjamin', 'Lopez', 'Manager', '2017-06-25', 'benjamin.lopez@carrental.com'),
+(7, 'Isabella', 'Garcia', 'Sales Agent', '2020-09-05', 'isabella.garcia@carrental.com'),
+(8, 'Mason', 'Moore', 'Mechanic', '2019-11-30', 'mason.moore@carrental.com'),
+(9, 'Sophia', 'Hernandez', 'Sales Agent', '2023-02-18', 'sophia.hernandez@carrental.com'),
+(10, 'Ethan', 'King', 'Manager', '2016-12-01', 'ethan.king@carrental.com'),
+(11, 'Mia', 'Wright', 'Sales Agent', '2021-07-09', 'mia.wright@carrental.com'),
+(12, 'Alexander', 'Scott', 'Sales Agent', '2022-06-14', 'alexander.scott@carrental.com'),
+(13, 'Charlotte', 'Green', 'Mechanic', '2020-02-28', 'charlotte.green@carrental.com'),
+(14, 'James', 'Adams', 'Sales Agent', '2023-01-01', 'james.adams@carrental.com'),
+(15, 'Amelia', 'Baker', 'Manager', '2018-10-10', 'amelia.baker@carrental.com'),
+(16, 'Liam', 'Carter', 'Sales Agent', '2021-04-22', 'liam.carter@carrental.com'),
+(17, 'Harper', 'Edwards', 'Sales Agent', '2022-11-17', 'harper.edwards@carrental.com'),
+(18, 'Sebastian', 'Nelson', 'Mechanic', '2019-09-01', 'sebastian.nelson@carrental.com'),
+(19, 'Evelyn', 'Hill', 'Sales Agent', '2023-03-05', 'evelyn.hill@carrental.com'),
+(20, 'Jack', 'Gonzalez', 'Manager', '2017-07-04', 'jack.gonzalez@carrental.com'),
+(21, 'Chloe', 'Perez', 'Sales Agent', '2021-08-12', 'chloe.perez@carrental.com'),
+(22, 'Leo', 'Rivera', 'Sales Agent', '2022-01-20', 'leo.rivera@carrental.com'),
+(23, 'Zoe', 'Cook', 'Mechanic', '2020-10-10', 'zoe.cook@carrental.com'),
+(24, 'Wyatt', 'Watson', 'Sales Agent', '2023-04-01', 'wyatt.watson@carrental.com'),
+(25, 'Nora', 'Richardson', 'Manager', '2018-05-15', 'nora.richardson@carrental.com');
+
+
+-- Data for table `car_rental_db`.`Cars`
+INSERT INTO `car_rental_db`.`Cars` (`car_id`, `make`, `model`, `year`, `license_plate`, `daily_rate`, `car_type_id`, `current_location`, `status`) VALUES
+(1, 'Honda', 'Civic', 2021, 'ABC-123', 45.00, 1, 'Main Lot', 'Available'),
+(2, 'Toyota', 'RAV4', 2022, 'DEF-456', 60.00, 2, 'Main Lot', 'Available'),
+(3, 'Ford', 'F-150', 2020, 'GHI-789', 75.00, 3, 'Main Lot', 'Rented'),
+(4, 'Chevrolet', 'Corvette', 2023, 'JKL-012', 120.00, 4, 'Service Center', 'Maintenance'),
+(5, 'Nissan', 'Versa', 2021, 'MNO-345', 40.00, 1, 'Main Lot', 'Available'),
+(6, 'Hyundai', 'Tucson', 2022, 'PQR-678', 65.00, 2, 'Main Lot', 'Rented'),
+(7, 'Ram', '1500', 2021, 'STU-901', 80.00, 3, 'Main Lot', 'Available'),
+(8, 'Jeep', 'Wrangler', 2023, 'VWX-234', 90.00, 4, 'Main Lot', 'Available'),
+(9, 'Kia', 'Seltos', 2022, 'YZA-567', 55.00, 2, 'Main Lot', 'Available'),
+(10, 'Subaru', 'Outback', 2021, 'BCD-890', 65.00, 2, 'Main Lot', 'Rented'),
+(11, 'Mercedes-Benz', 'C-Class', 2023, 'EFG-123', 150.00, 1, 'Main Lot', 'Available'),
+(12, 'BMW', 'X5', 2022, 'HIJ-456', 180.00, 2, 'Main Lot', 'Available'),
+(13, 'Audi', 'A4', 2021, 'KLM-789', 140.00, 1, 'Service Center', 'Maintenance'),
+(14, 'Tesla', 'Model 3', 2023, 'NOP-012', 130.00, 1, 'Main Lot', 'Rented'),
+(15, 'Volvo', 'XC90', 2022, 'QRS-345', 110.00, 2, 'Main Lot', 'Available'),
+(16, 'Porsche', '911', 2021, 'TUV-678', 250.00, 4, 'Main Lot', 'Available'),
+(17, 'Lexus', 'RX', 2023, 'WXY-901', 100.00, 2, 'Main Lot', 'Rented'),
+(18, 'Ford', 'Mustang', 2022, 'ZAB-234', 95.00, 4, 'Main Lot', 'Available'),
+(19, 'Volkswagen', 'Jetta', 2021, 'CDE-567', 50.00, 1, 'Main Lot', 'Available'),
+(20, 'GMC', 'Sierra', 2023, 'FGH-890', 85.00, 3, 'Main Lot', 'Available'),
+(21, 'Chevrolet', 'Malibu', 2022, 'IJK-123', 55.00, 1, 'Main Lot', 'Rented'),
+(22, 'Honda', 'CRV', 2021, 'LMN-456', 65.00, 2, 'Main Lot', 'Available'),
+(23, 'Ford', 'Explorer', 2023, 'OPQ-789', 70.00, 2, 'Main Lot', 'Rented'),
+(24, 'Toyota', 'Tacoma', 2022, 'RST-012', 80.00, 3, 'Main Lot', 'Available'),
+(25, 'Honda', 'Odyssey', 2021, 'UVW-345', 70.00, 5, 'Main Lot', 'Available');
+
+
+-- Data for table `car_rental_db`.`Rentals`
+INSERT INTO `car_rental_db`.`Rentals` (`rental_id`, `customer_id`, `car_id`, `pickup_date`, `return_date`, `total_cost`) VALUES
+(1, 1, 3, '2023-01-01', '2023-01-05', 300.00),
+(2, 2, 6, '2023-01-02', '2023-01-07', 325.00),
+(3, 3, 10, '2023-01-03', NULL, NULL),
+(4, 4, 14, '2023-01-04', '2023-01-10', 780.00),
+(5, 5, 17, '2023-01-05', NULL, NULL),
+(6, 6, 21, '2023-01-06', '2023-01-12', 385.00),
+(7, 7, 23, '2023-01-07', NULL, NULL),
+(8, 8, 1, '2023-01-08', '2023-01-15', 315.00),
+(9, 9, 2, '2023-01-09', NULL, NULL),
+(10, 10, 4, '2023-01-10', '2023-01-14', 480.00),
+(11, 11, 5, '2023-01-11', '2023-01-18', 320.00),
+(12, 12, 7, '2023-01-12', NULL, NULL),
+(13, 13, 8, '2023-01-13', '2023-01-20', 630.00),
+(14, 14, 9, '2023-01-14', NULL, NULL),
+(15, 15, 11, '2023-01-15', '2023-01-22', 1050.00),
+(16, 16, 12, '2023-01-16', NULL, NULL),
+(17, 17, 13, '2023-01-17', '2023-01-24', 980.00),
+(18, 18, 15, '2023-01-18', NULL, NULL),
+(19, 19, 16, '2023-01-19', '2023-01-26', 1750.00),
+(20, 20, 18, '2023-01-20', NULL, NULL),
+(21, 21, 19, '2023-01-21', '2023-01-28', 350.00),
+(22, 22, 20, '2023-01-22', NULL, NULL),
+(23, 23, 22, '2023-01-23', '2023-01-30', 455.00),
+(24, 24, 24, '2023-01-24', NULL, NULL),
+(25, 25, 25, '2023-01-25', '2023-02-01', 490.00);
+
+
+-- Data for table `car_rental_db`.`Payments`
+INSERT INTO `car_rental_db`.`Payments` (`payment_id`, `rental_id`, `amount`, `payment_date`, `payment_method`) VALUES
+(1, 1, 300.00, '2023-01-05', 'Credit Card'),
+(2, 2, 325.00, '2023-01-07', 'Cash'),
+(3, 4, 780.00, '2023-01-10', 'Online'),
+(4, 6, 385.00, '2023-01-12', 'Credit Card'),
+(5, 8, 315.00, '2023-01-15', 'Credit Card'),
+(6, 10, 480.00, '2023-01-14', 'Credit Card'),
+(7, 11, 320.00, '2023-01-18', 'Cash'),
+(8, 13, 630.00, '2023-01-20', 'Online'),
+(9, 15, 1050.00, '2023-01-22', 'Credit Card'),
+(10, 17, 980.00, '2023-01-24', 'Credit Card'),
+(11, 19, 1750.00, '2023-01-26', 'Online'),
+(12, 21, 350.00, '2023-01-28', 'Cash'),
+(13, 23, 455.00, '2023-01-30', 'Credit Card'),
+(14, 25, 490.00, '2023-02-01', 'Online'),
+(15, 1, 0.00, '2023-01-01', 'Deposit'),
+(16, 2, 0.00, '2023-01-02', 'Deposit'),
+(17, 3, 0.00, '2023-01-03', 'Deposit'),
+(18, 4, 0.00, '2023-01-04', 'Deposit'),
+(19, 5, 0.00, '2023-01-05', 'Deposit'),
+(20, 6, 0.00, '2023-01-06', 'Deposit'),
+(21, 7, 0.00, '2023-01-07', 'Deposit'),
+(22, 8, 0.00, '2023-01-08', 'Deposit'),
+(23, 9, 0.00, '2023-01-09', 'Deposit'),
+(24, 10, 0.00, '2023-01-10', 'Deposit'),
+(25, 11, 0.00, '2023-01-11', 'Deposit');
+
+ALTER TABLE `car_rental_db`.`Customers`
+ADD COLUMN `password` VARCHAR(255) NULL AFTER `date_of_birth`;
+
+ALTER TABLE `car_rental_db`.`Cars`
+ADD COLUMN `image_path` VARCHAR(255) NULL AFTER `status`;
+
+ALTER TABLE `car_rental_db`.`Rentals`
+ADD COLUMN `late_fee` DECIMAL(10,2) NULL AFTER `total_cost`;
+
+
+-- Update `car_rental_db`.`Cars` table with new data
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 55000, `purchase_date` = '2021-02-10', `previous_owners` = 'Acme Dealership' WHERE `car_id` = 1;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 32000, `purchase_date` = '2022-04-15', `previous_owners` = 'Bayside Auto' WHERE `car_id` = 2;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 78000, `purchase_date` = '2020-03-20', `previous_owners` = 'City Motors' WHERE `car_id` = 3;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 15000, `purchase_date` = '2023-01-05', `previous_owners` = 'Luxury Lease Co.' WHERE `car_id` = 4;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 62000, `purchase_date` = '2021-05-25', `previous_owners` = 'Southside Cars' WHERE `car_id` = 5;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 41000, `purchase_date` = '2022-07-01', `previous_owners` = 'Private Seller' WHERE `car_id` = 6;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 75000, `purchase_date` = '2021-04-10', `previous_owners` = 'Auto Exchange' WHERE `car_id` = 7;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 20000, `purchase_date` = '2023-03-18', `previous_owners` = 'Acme Dealership' WHERE `car_id` = 8;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 35000, `purchase_date` = '2022-05-20', `previous_owners` = 'Bayside Auto' WHERE `car_id` = 9;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 68000, `purchase_date` = '2021-06-12', `previous_owners` = 'City Motors' WHERE `car_id` = 10;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 12000, `purchase_date` = '2023-02-28', `previous_owners` = 'Luxury Lease Co.' WHERE `car_id` = 11;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 38000, `purchase_date` = '2022-08-05', `previous_owners` = 'Southside Cars' WHERE `car_id` = 12;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 50000, `purchase_date` = '2021-03-01', `previous_owners` = 'Private Seller' WHERE `car_id` = 13;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 18000, `purchase_date` = '2023-04-20', `previous_owners` = 'Auto Exchange' WHERE `car_id` = 14;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 45000, `purchase_date` = '2022-09-15', `previous_owners` = 'Acme Dealership' WHERE `car_id` = 15;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 10000, `purchase_date` = '2021-01-20', `previous_owners` = 'Bayside Auto' WHERE `car_id` = 16;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 29000, `purchase_date` = '2023-05-10', `previous_owners` = 'City Motors' WHERE `car_id` = 17;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 22000, `purchase_date` = '2022-03-05', `previous_owners` = 'Luxury Lease Co.' WHERE `car_id` = 18;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 60000, `purchase_date` = '2021-07-22', `previous_owners` = 'Southside Cars' WHERE `car_id` = 19;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 17000, `purchase_date` = '2023-06-01', `previous_owners` = 'Private Seller' WHERE `car_id` = 20;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 48000, `purchase_date` = '2022-02-15', `previous_owners` = 'Auto Exchange' WHERE `car_id` = 21;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 53000, `purchase_date` = '2021-09-01', `previous_owners` = 'Acme Dealership' WHERE `car_id` = 22;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 27000, `purchase_date` = '2023-07-08', `previous_owners` = 'Bayside Auto' WHERE `car_id` = 23;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 39000, `purchase_date` = '2022-10-25', `previous_owners` = 'City Motors' WHERE `car_id` = 24;
+UPDATE `car_rental_db`.`Cars` SET `mileage` = 58000, `purchase_date` = '2021-08-18', `previous_owners` = 'Luxury Lease Co.' WHERE `car_id` = 25;
+
+INSERT INTO `car_rental_db`.`Maintenance` (`car_id`, `service_date`, `service_type`, `cost`, `notes`) VALUES
+(1, '2023-05-20', 'Oil Change', 45.00, 'Standard oil and filter change.'),
+(2, '2023-07-10', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(3, '2023-08-05', 'Brake Pad Replacement', 250.00, 'Replaced front brake pads and rotors.'),
+(4, '2023-04-01', 'Fluid Check', 0.00, 'Checked all fluids, no issues.'),
+(5, '2023-06-15', 'Full Service Inspection', 120.00, 'Comprehensive check of all systems.'),
+(6, '2023-09-12', 'Battery Replacement', 150.00, 'Replaced old battery with a new one.'),
+(7, '2023-03-25', 'Oil Change', 45.00, 'Routine oil and filter change.'),
+(8, '2023-05-08', 'Tire Rotation', 30.00, 'Rotated all four tires.'),
+(9, '2023-07-22', 'Air Filter Replacement', 25.00, 'Replaced engine and cabin air filters.'),
+(10, '2023-09-01', 'Transmission Fluid Flush', 200.00, 'Flushed and replaced transmission fluid.'),
+(11, '2023-04-18', 'Oil Change', 60.00, 'High-performance synthetic oil change.'),
+(12, '2023-08-10', 'Brake Pad Replacement', 280.00, 'Replaced rear brake pads and bled lines.'),
+(13, '2023-02-14', 'Wheel Alignment', 85.00, 'Adjusted front and rear wheel alignment.'),
+(14, '2023-06-05', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(15, '2023-10-03', 'Oil Change', 45.00, 'Standard oil and filter change.'),
+(16, '2023-03-01', 'Fluid Check', 0.00, 'Checked fluids before a long-term rental.'),
+(17, '2023-07-19', 'Spark Plug Replacement', 150.00, 'Replaced all spark plugs.'),
+(18, '2023-01-28', 'Oil Change', 45.00, 'Standard oil and filter change.'),
+(19, '2023-08-30', 'Tire Rotation', 30.00, 'Rotated all four tires.'),
+(20, '2023-05-11', 'Brake System Check', 50.00, 'Inspected entire brake system.'),
+(21, '2023-04-05', 'Full Service Inspection', 100.00, 'Comprehensive vehicle inspection.'),
+(22, '2023-09-18', 'Oil Change', 45.00, 'Standard oil and filter change.'),
+(23, '2023-07-15', 'Tire Rotation and Balance', 60.00, 'Rotated and balanced all tires.'),
+(24, '2023-10-29', 'Windshield Wiper Replacement', 20.00, 'Replaced front wipers.'),
+(25, '2023-02-22', 'Oil Change', 45.00, 'Routine oil and filter change.');
+
+-- Insert 25 maintenance records for each car
+INSERT INTO `car_rental_db`.`Maintenance` (`car_id`, `service_date`, `service_type`, `cost`, `notes`)
+VALUES
+(1, '2021-08-25', 'Oil Change', 45.00, 'First scheduled oil and filter change.'),
+(1, '2022-03-10', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(1, '2022-06-15', 'Oil Change', 45.00, 'Second oil change.'),
+(1, '2022-11-01', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(1, '2023-02-20', 'Fluid Check', 20.00, 'Checked all fluid levels.'),
+(1, '2023-05-20', 'Oil Change', 45.00, 'Third oil change.'),
+(1, '2023-08-15', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(1, '2023-12-01', 'Battery Check', 0.00, 'Checked battery health.'),
+(1, '2024-03-05', 'Oil Change', 50.00, 'Fourth oil change.'),
+(1, '2024-06-20', 'Tire Replacement', 450.00, 'Replaced all four tires.'),
+(1, '2024-09-10', 'Full Inspection', 150.00, 'Comprehensive inspection.'),
+(1, '2025-01-15', 'Oil Change', 50.00, 'Fifth oil change.'),
+(1, '2025-04-30', 'Coolant Flush', 90.00, 'Coolant system flush and refill.'),
+(1, '2025-07-20', 'AC Service', 120.00, 'Recharged AC system.'),
+(1, '2025-09-15', 'Windshield Wiper Replacement', 25.00, 'Replaced front wipers.'),
+(1, '2021-12-10', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(1, '2022-09-15', 'Brake Service', 210.00, 'Replaced rear brake pads.'),
+(1, '2023-03-30', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(1, '2023-11-25', 'Battery Replacement', 150.00, 'Replaced battery.'),
+(1, '2024-04-10', 'Oil Change', 50.00, 'Sixth oil change.'),
+(1, '2024-08-01', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(1, '2025-02-18', 'Belt Replacement', 95.00, 'Replaced serpentine belt.'),
+(1, '2025-06-05', 'Exhaust System Check', 40.00, 'Inspected exhaust system for leaks.'),
+(1, '2025-08-20', 'Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(1, '2025-09-10', 'Pre-rental Check', 0.00, 'Checked car before a new rental.'),
+
+(2, '2022-09-01', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(2, '2023-01-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(2, '2023-05-01', 'Oil Change', 45.00, 'Second oil change.'),
+(2, '2023-08-20', 'Brake Service', 200.00, 'Replaced front brake pads.'),
+(2, '2024-01-10', 'Fluid Check', 25.00, 'Checked all fluid levels.'),
+(2, '2024-04-05', 'Oil Change', 45.00, 'Third oil change.'),
+(2, '2024-07-30', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(2, '2024-11-15', 'Battery Check', 0.00, 'Checked battery health.'),
+(2, '2025-02-25', 'Oil Change', 50.00, 'Fourth oil change.'),
+(2, '2025-06-10', 'Tire Replacement', 400.00, 'Replaced all four tires.'),
+(2, '2025-08-01', 'Full Inspection', 150.00, 'Comprehensive inspection.'),
+(2, '2022-10-20', 'Wiper Blade Replacement', 20.00, 'Replaced windshield wipers.'),
+(2, '2023-03-22', 'Air Filter Replacement', 30.00, 'Replaced cabin and engine air filters.'),
+(2, '2023-09-08', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(2, '2024-02-14', 'Brake Fluid Flush', 90.00, 'Flushed and replaced brake fluid.'),
+(2, '2024-06-18', 'Oil Change', 50.00, 'Fifth oil change.'),
+(2, '2024-09-25', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(2, '2025-01-05', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(2, '2025-04-10', 'AC Service', 120.00, 'Recharged AC system.'),
+(2, '2025-07-28', 'Bulb Replacement', 15.00, 'Replaced a brake light.'),
+(2, '2025-09-15', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(2, '2022-07-10', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(2, '2023-02-05', 'Scheduled Oil Change', 45.00, 'Scheduled maintenance.'),
+(2, '2024-08-15', 'Brake Fluid Flush', 90.00, 'Routine brake fluid service.'),
+(2, '2025-05-12', 'Battery Check', 0.00, 'Performed battery check.'),
+
+(3, '2020-09-10', 'Oil Change', 60.00, 'Scheduled maintenance.'),
+(3, '2021-02-15', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(3, '2021-07-05', 'Oil Change', 60.00, 'Second oil change.'),
+(3, '2021-11-20', 'Brake Service', 300.00, 'Replaced front and rear brake pads.'),
+(3, '2022-04-10', 'Fluid Check', 30.00, 'Checked all fluid levels.'),
+(3, '2022-09-01', 'Oil Change', 60.00, 'Third oil change.'),
+(3, '2023-01-15', 'Wheel Alignment', 90.00, 'Performed wheel alignment.'),
+(3, '2023-05-20', 'Battery Replacement', 180.00, 'Replaced battery.'),
+(3, '2023-10-10', 'Oil Change', 65.00, 'Fourth oil change.'),
+(3, '2024-02-28', 'Tire Replacement', 600.00, 'Replaced all four tires.'),
+(3, '2024-08-12', 'Full Inspection', 180.00, 'Comprehensive inspection.'),
+(3, '2025-01-05', 'Oil Change', 65.00, 'Fifth oil change.'),
+(3, '2025-05-10', 'Coolant Flush', 100.00, 'Coolant system flush and refill.'),
+(3, '2025-08-25', 'AC Service', 150.00, 'Recharged AC system.'),
+(3, '2025-09-10', 'Pre-rental Check', 0.00, 'Checked car before a new rental.'),
+(3, '2020-05-15', 'Initial Service', 0.00, 'Inspection upon purchase.'),
+(3, '2021-04-20', 'Scheduled Service', 60.00, 'Oil change and fluid check.'),
+(3, '2022-01-10', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(3, '2022-07-25', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(3, '2023-02-05', 'Oil Change', 65.00, 'Sixth oil change.'),
+(3, '2023-09-18', 'Belt Replacement', 110.00, 'Replaced serpentine belt.'),
+(3, '2024-03-01', 'Suspension Check', 70.00, 'Inspected suspension.'),
+(3, '2024-11-20', 'Exhaust Repair', 250.00, 'Repaired small exhaust leak.'),
+(3, '2025-03-15', 'Oil Change', 65.00, 'Seventh oil change.'),
+(3, '2025-07-01', 'General Checkup', 0.00, 'General inspection for safety.'),
+
+-- Continue this pattern for all 25 cars
+(4, '2023-07-01', 'Oil Change', 75.00, 'Synthetic oil change.'),
+(4, '2024-01-10', 'Fluid Check', 30.00, 'Checked all fluid levels.'),
+(4, '2024-06-25', 'Tire Rotation', 40.00, 'Performance tire rotation.'),
+(4, '2025-01-15', 'Brake Service', 350.00, 'Replaced high-performance brake pads.'),
+(4, '2025-08-10', 'Full Service Inspection', 200.00, 'Comprehensive inspection for race components.'),
+(4, '2023-09-01', 'Oil Change', 75.00, 'Scheduled maintenance'),
+(4, '2024-03-15', 'Suspension Check', 100.00, 'Checked suspension for wear'),
+(4, '2024-10-01', 'Oil Change', 75.00, 'Synthetic oil change'),
+(4, '2025-04-20', 'Wheel Alignment', 90.00, 'Adjusted wheel alignment'),
+(4, '2025-09-10', 'Brake Fluid Flush', 120.00, 'Flushed and replaced brake fluid'),
+(4, '2023-06-10', 'Wiper Replacement', 25.00, 'Replaced wiper blades'),
+(4, '2024-02-05', 'Tire Inspection', 0.00, 'Inspected tires for wear'),
+(4, '2024-08-18', 'Belt Check', 0.00, 'Checked serpentine belt'),
+(4, '2025-02-14', 'Coolant Flush', 90.00, 'Flushed coolant system'),
+(4, '2025-07-25', 'Headlight Adjustment', 35.00, 'Adjusted headlight aim'),
+(4, '2023-01-20', 'Initial Inspection', 0.00, 'Pre-sale inspection'),
+(4, '2023-04-15', 'Scheduled Oil Change', 75.00, 'Initial oil change'),
+(4, '2023-12-05', 'Tire Rotation', 40.00, 'Routine tire rotation'),
+(4, '2024-05-20', 'Air Filter Change', 40.00, 'Replaced engine air filter'),
+(4, '2024-11-10', 'Brake Pad Check', 0.00, 'Inspected brake pad wear'),
+(4, '2025-03-25', 'AC Service', 120.00, 'Recharged AC system'),
+(4, '2025-06-30', 'Oil Change', 75.00, 'Scheduled oil change'),
+(4, '2025-09-05', 'Vehicle Detail', 150.00, 'Full interior and exterior detail'),
+(5, '2021-11-10', 'Oil Change', 40.00, 'Standard oil change.'),
+(5, '2022-05-01', 'Tire Rotation', 25.00, 'Routine tire rotation.'),
+(5, '2022-11-20', 'Oil Change', 40.00, 'Second oil change.'),
+(5, '2023-04-15', 'Brake Inspection', 0.00, 'Inspected brakes.'),
+(5, '2023-10-05', 'Oil Change', 45.00, 'Third oil change.'),
+(5, '2024-03-10', 'Wheel Alignment', 75.00, 'Performed wheel alignment.'),
+(5, '2024-09-01', 'Oil Change', 45.00, 'Fourth oil change.'),
+(5, '2025-02-25', 'Tire Replacement', 350.00, 'Replaced all four tires.'),
+(5, '2025-08-05', 'Full Inspection', 100.00, 'Comprehensive inspection.'),
+(5, '2021-07-15', 'Initial Check', 0.00, 'Initial inspection upon purchase.'),
+(5, '2022-02-20', 'Scheduled Service', 40.00, 'Oil change and fluid check.'),
+(5, '2022-08-10', 'Brake Fluid Flush', 80.00, 'Flushed brake fluid.'),
+(5, '2023-01-30', 'Suspension Check', 50.00, 'Inspected suspension components.'),
+(5, '2023-07-25', 'Oil Change', 45.00, 'Fifth oil change.'),
+(5, '2024-01-15', 'Belt Replacement', 90.00, 'Replaced serpentine belt.'),
+(5, '2024-06-20', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(5, '2025-01-05', 'Oil Change', 45.00, 'Sixth oil change.'),
+(5, '2025-06-18', 'Air Filter Change', 30.00, 'Replaced air filters.'),
+(5, '2021-09-05', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(5, '2022-04-10', 'Wiper Replacement', 20.00, 'Replaced wiper blades.'),
+(5, '2023-02-10', 'Coolant Check', 0.00, 'Checked coolant level.'),
+(5, '2023-09-20', 'Scheduled Tire Rotation', 25.00, 'Routine tire rotation.'),
+(5, '2024-05-15', 'Battery Check', 0.00, 'Checked battery health.'),
+(5, '2024-11-20', 'Oil Change', 45.00, 'Seventh oil change.'),
+(5, '2025-05-01', 'Pre-rental check', 0.00, 'Checked car for new rental.'),
+(6, '2022-10-15', 'Oil Change', 50.00, 'Standard oil and filter change.'),
+(6, '2023-03-01', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(6, '2023-08-10', 'Oil Change', 50.00, 'Second oil change.'),
+(6, '2024-01-20', 'Brake Pad Replacement', 220.00, 'Replaced front brake pads.'),
+(6, '2024-06-10', 'Full Service Inspection', 130.00, 'Comprehensive check of all systems.'),
+(6, '2024-11-05', 'Oil Change', 55.00, 'Third oil change.'),
+(6, '2025-04-15', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(6, '2025-08-20', 'Tire Replacement', 480.00, 'Replaced all four tires.'),
+(6, '2022-08-10', 'Wiper Replacement', 25.00, 'Replaced windshield wipers.'),
+(6, '2023-02-25', 'Air Filter Replacement', 35.00, 'Replaced air filters.'),
+(6, '2023-09-18', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(6, '2024-03-20', 'Brake Fluid Flush', 90.00, 'Flushed and replaced brake fluid.'),
+(6, '2024-09-10', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(6, '2025-02-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(6, '2025-07-28', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(6, '2022-07-20', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(6, '2022-12-10', 'Scheduled Oil Change', 50.00, 'Scheduled maintenance.'),
+(6, '2023-06-05', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(6, '2023-11-25', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(6, '2024-05-15', 'Oil Change', 55.00, 'Fourth oil change.'),
+(6, '2024-10-20', 'Suspension Check', 60.00, 'Inspected suspension.'),
+(6, '2025-03-10', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(6, '2025-08-01', 'Oil Change', 55.00, 'Fifth oil change.'),
+(6, '2025-09-15', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(6, '2023-04-10', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(7, '2021-08-15', 'Oil Change', 60.00, 'Standard oil change.'),
+(7, '2022-02-20', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(7, '2022-08-10', 'Oil Change', 60.00, 'Second oil change.'),
+(7, '2023-01-05', 'Brake Pad Replacement', 280.00, 'Replaced front brake pads.'),
+(7, '2023-07-15', 'Full Service Inspection', 150.00, 'Comprehensive check of all systems.'),
+(7, '2024-01-25', 'Oil Change', 65.00, 'Third oil change.'),
+(7, '2024-06-10', 'Wheel Alignment', 90.00, 'Performed wheel alignment.'),
+(7, '2024-12-01', 'Battery Replacement', 180.00, 'Replaced battery.'),
+(7, '2025-05-10', 'Oil Change', 65.00, 'Fourth oil change.'),
+(7, '2025-09-15', 'Tire Replacement', 600.00, 'Replaced all four tires.'),
+(7, '2021-05-20', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(7, '2021-11-05', 'Scheduled Service', 60.00, 'Oil change and fluid check.'),
+(7, '2022-05-10', 'Brake Fluid Flush', 95.00, 'Flushed and replaced brake fluid.'),
+(7, '2022-10-20', 'Suspension Check', 70.00, 'Inspected suspension components.'),
+(7, '2023-03-25', 'Oil Change', 65.00, 'Fifth oil change.'),
+(7, '2023-09-08', 'Belt Replacement', 110.00, 'Replaced serpentine belt.'),
+(7, '2024-02-15', 'Exhaust System Check', 50.00, 'Inspected exhaust system.'),
+(7, '2024-07-28', 'Oil Change', 65.00, 'Sixth oil change.'),
+(7, '2025-01-10', 'Air Filter Change', 45.00, 'Replaced air filters.'),
+(7, '2025-06-05', 'AC Service', 150.00, 'Recharged AC system.'),
+(7, '2025-08-18', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(7, '2021-07-01', 'Scheduled Tire Rotation', 35.00, 'Routine maintenance.'),
+(7, '2022-01-10', 'Fluid Check', 0.00, 'Checked all fluid levels.'),
+(7, '2023-04-12', 'Wiper Replacement', 25.00, 'Replaced windshield wipers.'),
+(7, '2024-09-01', 'Battery Check', 0.00, 'Performed battery health check.'),
+(8, '2023-08-01', 'Oil Change', 55.00, 'Scheduled maintenance.'),
+(8, '2024-02-10', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(8, '2024-08-05', 'Oil Change', 55.00, 'Second oil change.'),
+(8, '2025-01-20', 'Brake Inspection', 0.00, 'Inspected brakes.'),
+(8, '2025-06-15', 'Full Service Inspection', 130.00, 'Comprehensive check of all systems.'),
+(8, '2023-05-01', 'Initial Check', 0.00, 'Initial inspection upon purchase.'),
+(8, '2023-11-20', 'Scheduled Service', 55.00, 'Oil change and fluid check.'),
+(8, '2024-05-15', 'Brake Fluid Flush', 85.00, 'Flushed brake fluid.'),
+(8, '2024-10-25', 'Suspension Check', 65.00, 'Inspected suspension components.'),
+(8, '2025-03-01', 'Oil Change', 60.00, 'Third oil change.'),
+(8, '2025-09-10', 'Belt Replacement', 100.00, 'Replaced serpentine belt.'),
+(8, '2023-06-20', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(8, '2023-12-10', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(8, '2024-06-05', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(8, '2024-12-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(8, '2025-05-20', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(8, '2023-09-10', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(8, '2024-03-25', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(8, '2024-09-01', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(8, '2025-02-18', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(8, '2025-07-28', 'General Checkup', 0.00, 'General inspection for safety.'),
+(8, '2023-01-25', 'Initial checkup', 0.00, 'Pre-sale inspection.'),
+(8, '2024-01-05', 'Scheduled Oil Change', 55.00, 'Scheduled maintenance.'),
+(8, '2024-12-10', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(8, '2025-04-18', 'Air Filter Change', 30.00, 'Replaced air filters.'),
+(9, '2022-09-01', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(9, '2023-01-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(9, '2023-05-01', 'Oil Change', 45.00, 'Second oil change.'),
+(9, '2023-08-20', 'Brake Service', 200.00, 'Replaced front brake pads.'),
+(9, '2024-01-10', 'Fluid Check', 25.00, 'Checked all fluid levels.'),
+(9, '2024-04-05', 'Oil Change', 45.00, 'Third oil change.'),
+(9, '2024-07-30', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(9, '2024-11-15', 'Battery Check', 0.00, 'Checked battery health.'),
+(9, '2025-02-25', 'Oil Change', 50.00, 'Fourth oil change.'),
+(9, '2025-06-10', 'Tire Replacement', 400.00, 'Replaced all four tires.'),
+(9, '2025-08-01', 'Full Inspection', 150.00, 'Comprehensive inspection.'),
+(9, '2022-08-10', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(9, '2023-02-25', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(9, '2023-09-18', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(9, '2024-03-20', 'Brake Fluid Flush', 90.00, 'Flushed and replaced brake fluid.'),
+(9, '2024-09-10', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(9, '2025-02-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(9, '2025-07-28', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(9, '2022-07-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(9, '2022-12-10', 'Scheduled Oil Change', 45.00, 'Scheduled maintenance.'),
+(9, '2023-06-05', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(9, '2023-11-25', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(9, '2024-05-15', 'Oil Change', 50.00, 'Fifth oil change.'),
+(9, '2024-10-20', 'Suspension Check', 60.00, 'Inspected suspension.'),
+(9, '2025-03-10', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(10, '2021-09-10', 'Oil Change', 50.00, 'Scheduled maintenance.'),
+(10, '2022-02-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(10, '2022-07-05', 'Oil Change', 50.00, 'Second oil change.'),
+(10, '2022-12-20', 'Brake Service', 250.00, 'Replaced front brake pads.'),
+(10, '2023-05-10', 'Fluid Check', 25.00, 'Checked all fluid levels.'),
+(10, '2023-10-01', 'Oil Change', 55.00, 'Third oil change.'),
+(10, '2024-03-15', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(10, '2024-08-20', 'Battery Replacement', 160.00, 'Replaced battery.'),
+(10, '2025-01-25', 'Oil Change', 55.00, 'Fourth oil change.'),
+(10, '2025-06-10', 'Tire Replacement', 500.00, 'Replaced all four tires.'),
+(10, '2025-09-01', 'Full Inspection', 150.00, 'Comprehensive inspection.'),
+(10, '2021-07-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(10, '2021-12-10', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(10, '2022-06-25', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(10, '2022-11-18', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(10, '2023-04-20', 'Brake Fluid Flush', 90.00, 'Flushed and replaced brake fluid.'),
+(10, '2023-09-10', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(10, '2024-02-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(10, '2024-07-28', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(10, '2025-01-10', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(10, '2025-05-25', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(10, '2025-09-15', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(10, '2021-05-20', 'General Checkup', 0.00, 'General inspection.'),
+(10, '2022-01-10', 'Scheduled Service', 50.00, 'Oil change and fluid check.'),
+(10, '2024-04-12', 'Suspension Check', 60.00, 'Inspected suspension.'),
+(11, '2023-07-15', 'Oil Change', 70.00, 'Synthetic oil change.'),
+(11, '2024-01-20', 'Fluid Check', 30.00, 'Checked all fluid levels.'),
+(11, '2024-06-28', 'Tire Rotation', 40.00, 'Performance tire rotation.'),
+(11, '2025-01-10', 'Brake Service', 350.00, 'Replaced high-performance brake pads.'),
+(11, '2025-08-05', 'Full Service Inspection', 200.00, 'Comprehensive inspection.'),
+(11, '2023-04-01', 'Initial check', 0.00, 'Inspection upon purchase.'),
+(11, '2023-11-20', 'Scheduled Service', 70.00, 'Oil change and fluid check.'),
+(11, '2024-09-05', 'AC Service', 150.00, 'Recharged AC system.'),
+(11, '2025-03-10', 'Battery check', 0.00, 'Inspected battery health.'),
+(11, '2023-06-10', 'Wiper Replacement', 25.00, 'Replaced wiper blades.'),
+(11, '2024-02-05', 'Tire Inspection', 0.00, 'Inspected tires for wear.'),
+(11, '2024-08-18', 'Belt Check', 0.00, 'Checked serpentine belt.'),
+(11, '2025-02-14', 'Coolant Flush', 90.00, 'Flushed coolant system.'),
+(11, '2025-07-25', 'Headlight Adjustment', 35.00, 'Adjusted headlight aim.'),
+(11, '2023-01-20', 'Initial Inspection', 0.00, 'Pre-sale inspection.'),
+(11, '2023-04-15', 'Scheduled Oil Change', 70.00, 'Initial oil change.'),
+(11, '2023-12-05', 'Tire Rotation', 40.00, 'Routine tire rotation.'),
+(11, '2024-05-20', 'Air Filter Change', 40.00, 'Replaced engine air filter.'),
+(11, '2024-11-10', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(11, '2025-03-25', 'AC Service', 120.00, 'Recharged AC system.'),
+(11, '2025-06-30', 'Oil Change', 70.00, 'Scheduled oil change.'),
+(11, '2025-09-05', 'Vehicle Detail', 150.00, 'Full interior and exterior detail.'),
+(11, '2023-09-01', 'Scheduled maintenance', 70.00, 'Oil change.'),
+(11, '2024-03-15', 'Suspension Check', 100.00, 'Checked suspension.'),
+(11, '2024-10-01', 'Oil Change', 70.00, 'Synthetic oil change.'),
+(12, '2022-11-15', 'Oil Change', 65.00, 'Scheduled maintenance.'),
+(12, '2023-05-01', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(12, '2023-11-10', 'Oil Change', 65.00, 'Second oil change.'),
+(12, '2024-04-20', 'Brake Pad Replacement', 300.00, 'Replaced front brake pads.'),
+(12, '2024-10-05', 'Full Service Inspection', 180.00, 'Comprehensive check of all systems.'),
+(12, '2025-03-15', 'Oil Change', 70.00, 'Third oil change.'),
+(12, '2025-09-01', 'Wheel Alignment', 95.00, 'Performed wheel alignment.'),
+(12, '2022-09-01', 'Initial Check', 0.00, 'Initial inspection upon purchase.'),
+(12, '2023-02-25', 'Wiper Replacement', 30.00, 'Replaced windshield wipers.'),
+(12, '2023-08-15', 'Air Filter Replacement', 40.00, 'Replaced air filters.'),
+(12, '2024-02-10', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(12, '2024-08-25', 'Brake Fluid Flush', 100.00, 'Flushed and replaced brake fluid.'),
+(12, '2025-01-30', 'Coolant Flush', 100.00, 'Coolant system flush.'),
+(12, '2025-07-05', 'AC Service', 150.00, 'Recharged AC system.'),
+(12, '2025-09-10', 'Headlight Bulb Replacement', 20.00, 'Replaced a headlight bulb.'),
+(12, '2022-08-15', 'Scheduled Oil Change', 65.00, 'Scheduled maintenance.'),
+(12, '2023-04-10', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(12, '2023-10-20', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(12, '2024-06-01', 'Oil Change', 70.00, 'Fourth oil change.'),
+(12, '2024-11-15', 'Suspension Check', 75.00, 'Inspected suspension.'),
+(12, '2025-04-20', 'Exhaust System Check', 50.00, 'Inspected exhaust system.'),
+(12, '2025-09-05', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(12, '2022-06-25', 'General Checkup', 0.00, 'General inspection.'),
+(12, '2023-01-20', 'Scheduled Service', 65.00, 'Oil change and fluid check.'),
+(12, '2024-05-18', 'Air Filter Change', 40.00, 'Replaced air filters.'),
+(13, '2021-08-10', 'Oil Change', 60.00, 'Scheduled maintenance.'),
+(13, '2022-01-15', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(13, '2022-06-25', 'Oil Change', 60.00, 'Second oil change.'),
+(13, '2022-12-10', 'Brake Pad Replacement', 250.00, 'Replaced front brake pads.'),
+(13, '2023-05-20', 'Full Service Inspection', 140.00, 'Comprehensive check of all systems.'),
+(13, '2023-11-01', 'Oil Change', 65.00, 'Third oil change.'),
+(13, '2024-04-15', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(13, '2024-10-20', 'Battery Replacement', 170.00, 'Replaced battery.'),
+(13, '2025-03-25', 'Oil Change', 65.00, 'Fourth oil change.'),
+(13, '2025-08-10', 'Tire Replacement', 550.00, 'Replaced all four tires.'),
+(13, '2021-05-15', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(13, '2021-10-30', 'Wiper Replacement', 25.00, 'Replaced windshield wipers.'),
+(13, '2022-05-10', 'Air Filter Replacement', 35.00, 'Replaced air filters.'),
+(13, '2022-11-20', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(13, '2023-04-25', 'Brake Fluid Flush', 90.00, 'Flushed and replaced brake fluid.'),
+(13, '2023-10-10', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(13, '2024-03-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(13, '2024-09-28', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(13, '2025-02-10', 'Scheduled Tire Rotation', 35.00, 'Routine maintenance.'),
+(13, '2025-07-25', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(13, '2021-04-01', 'General Checkup', 0.00, 'General inspection.'),
+(13, '2022-01-20', 'Scheduled Service', 60.00, 'Oil change and fluid check.'),
+(13, '2022-08-05', 'Suspension Check', 65.00, 'Inspected suspension.'),
+(13, '2023-03-10', 'Exhaust System Check', 50.00, 'Inspected exhaust system.'),
+(13, '2024-09-01', 'Oil Change', 65.00, 'Fifth oil change.'),
+(14, '2023-08-20', 'Oil Change', 70.00, 'Synthetic oil change.'),
+(14, '2024-02-15', 'Fluid Check', 35.00, 'Checked all fluid levels.'),
+(14, '2024-07-10', 'Tire Rotation', 40.00, 'Routine tire rotation.'),
+(14, '2025-01-05', 'Brake Service', 300.00, 'Replaced high-performance brake pads.'),
+(14, '2025-08-25', 'Full Service Inspection', 180.00, 'Comprehensive inspection.'),
+(14, '2023-05-01', 'Initial check', 0.00, 'Inspection upon purchase.'),
+(14, '2023-12-05', 'Scheduled Service', 70.00, 'Oil change and fluid check.'),
+(14, '2024-09-01', 'AC Service', 150.00, 'Recharged AC system.'),
+(14, '2025-03-20', 'Battery check', 0.00, 'Inspected battery health.'),
+(14, '2023-06-15', 'Wiper Replacement', 25.00, 'Replaced wiper blades.'),
+(14, '2024-02-28', 'Tire Inspection', 0.00, 'Inspected tires for wear.'),
+(14, '2024-08-10', 'Belt Check', 0.00, 'Checked serpentine belt.'),
+(14, '2025-02-20', 'Coolant Flush', 90.00, 'Flushed coolant system.'),
+(14, '2025-07-28', 'Headlight Adjustment', 35.00, 'Adjusted headlight aim.'),
+(14, '2023-04-30', 'Initial Inspection', 0.00, 'Pre-sale inspection.'),
+(14, '2023-10-15', 'Scheduled Oil Change', 70.00, 'Initial oil change.'),
+(14, '2024-05-20', 'Tire Rotation', 40.00, 'Routine tire rotation.'),
+(14, '2024-11-10', 'Air Filter Change', 40.00, 'Replaced engine air filter.'),
+(14, '2025-04-01', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(14, '2025-08-01', 'AC Service', 120.00, 'Recharged AC system.'),
+(14, '2023-09-01', 'Scheduled maintenance', 70.00, 'Oil change.'),
+(14, '2024-03-10', 'Suspension Check', 100.00, 'Checked suspension.'),
+(14, '2024-10-05', 'Oil Change', 70.00, 'Synthetic oil change.'),
+(14, '2025-04-25', 'Wheel Alignment', 90.00, 'Adjusted wheel alignment.'),
+(14, '2025-09-12', 'Brake Fluid Flush', 120.00, 'Flushed and replaced brake fluid.'),
+(15, '2023-01-20', 'Oil Change', 55.00, 'Scheduled maintenance.'),
+(15, '2023-07-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(15, '2024-01-10', 'Oil Change', 55.00, 'Second oil change.'),
+(15, '2024-06-25', 'Brake Pad Replacement', 220.00, 'Replaced front brake pads.'),
+(15, '2025-01-05', 'Full Service Inspection', 130.00, 'Comprehensive check of all systems.'),
+(15, '2022-10-10', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(15, '2023-04-25', 'Scheduled Service', 55.00, 'Oil change and fluid check.'),
+(15, '2023-10-15', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(15, '2024-04-01', 'Suspension Check', 65.00, 'Inspected suspension components.'),
+(15, '2024-10-20', 'Oil Change', 60.00, 'Third oil change.'),
+(15, '2025-03-15', 'Belt Replacement', 100.00, 'Replaced serpentine belt.'),
+(15, '2023-02-10', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(15, '2023-08-01', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(15, '2024-02-28', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(15, '2024-08-10', 'AC Service', 120.00, 'Recharged AC system.'),
+(15, '2025-01-25', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(15, '2022-12-01', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(15, '2023-06-15', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(15, '2024-02-10', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(15, '2024-09-05', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(15, '2025-02-20', 'General Checkup', 0.00, 'General inspection for safety.'),
+(15, '2022-11-20', 'Scheduled Service', 55.00, 'Oil change.'),
+(15, '2023-09-01', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(15, '2024-05-18', 'Air Filter Change', 30.00, 'Replaced air filters.'),
+(15, '2025-01-10', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(16, '2021-04-10', 'Oil Change', 70.00, 'Synthetic oil change.'),
+(16, '2021-08-15', 'Tire Rotation', 40.00, 'Routine tire rotation.'),
+(16, '2022-01-20', 'Oil Change', 70.00, 'Second oil change.'),
+(16, '2022-07-05', 'Brake Service', 400.00, 'Replaced high-performance brake pads.'),
+(16, '2023-01-15', 'Full Service Inspection', 250.00, 'Comprehensive inspection.'),
+(16, '2023-07-10', 'Oil Change', 75.00, 'Third oil change.'),
+(16, '2024-01-25', 'Wheel Alignment', 120.00, 'Performed wheel alignment.'),
+(16, '2024-08-01', 'Battery Replacement', 200.00, 'Replaced battery.'),
+(16, '2025-02-15', 'Oil Change', 75.00, 'Fourth oil change.'),
+(16, '2025-08-10', 'Tire Replacement', 800.00, 'Replaced all four tires.'),
+(16, '2021-03-01', 'Initial Inspection', 0.00, 'Inspection upon purchase.'),
+(16, '2021-09-20', 'Scheduled Service', 70.00, 'Oil change and fluid check.'),
+(16, '2022-03-10', 'Brake Fluid Flush', 120.00, 'Flushed brake fluid.'),
+(16, '2022-09-01', 'Suspension Check', 85.00, 'Inspected suspension components.'),
+(16, '2023-03-05', 'Oil Change', 75.00, 'Fifth oil change.'),
+(16, '2023-09-18', 'Belt Replacement', 150.00, 'Replaced serpentine belt.'),
+(16, '2024-03-30', 'Exhaust System Check', 60.00, 'Inspected exhaust system.'),
+(16, '2024-09-10', 'Oil Change', 75.00, 'Sixth oil change.'),
+(16, '2025-03-01', 'Air Filter Change', 50.00, 'Replaced air filters.'),
+(16, '2025-07-20', 'AC Service', 180.00, 'Recharged AC system.'),
+(16, '2025-09-15', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(16, '2021-06-15', 'Scheduled Tire Rotation', 40.00, 'Routine maintenance.'),
+(16, '2022-05-10', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(16, '2023-01-05', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(16, '2024-02-20', 'General Checkup', 0.00, 'General inspection for safety.'),
+(17, '2023-08-01', 'Oil Change', 60.00, 'Scheduled maintenance.'),
+(17, '2024-02-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(17, '2024-08-10', 'Oil Change', 60.00, 'Second oil change.'),
+(17, '2025-01-20', 'Brake Pad Replacement', 250.00, 'Replaced front brake pads.'),
+(17, '2025-06-15', 'Full Service Inspection', 150.00, 'Comprehensive check of all systems.'),
+(17, '2023-06-01', 'Initial Inspection', 0.00, 'Inspection upon purchase.'),
+(17, '2023-12-05', 'Scheduled Service', 60.00, 'Oil change and fluid check.'),
+(17, '2024-05-10', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(17, '2024-11-20', 'Suspension Check', 65.00, 'Inspected suspension components.'),
+(17, '2025-04-10', 'Oil Change', 65.00, 'Third oil change.'),
+(17, '2025-09-01', 'Belt Replacement', 100.00, 'Replaced serpentine belt.'),
+(17, '2023-07-10', 'Wiper Replacement', 25.00, 'Replaced windshield wipers.'),
+(17, '2024-01-05', 'Air Filter Replacement', 35.00, 'Replaced air filters.'),
+(17, '2024-07-20', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(17, '2025-01-25', 'AC Service', 120.00, 'Recharged AC system.'),
+(17, '2025-07-15', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(17, '2023-09-01', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(17, '2024-03-10', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(17, '2024-09-20', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(17, '2025-03-05', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(17, '2025-08-25', 'General Checkup', 0.00, 'General inspection for safety.'),
+(17, '2023-05-20', 'Initial checkup', 0.00, 'Pre-sale inspection.'),
+(17, '2024-01-01', 'Scheduled Oil Change', 60.00, 'Scheduled maintenance.'),
+(17, '2024-10-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(17, '2025-05-01', 'Air Filter Change', 35.00, 'Replaced air filters.'),
+(18, '2022-07-20', 'Oil Change', 50.00, 'Scheduled maintenance.'),
+(18, '2023-01-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(18, '2023-07-10', 'Oil Change', 50.00, 'Second oil change.'),
+(18, '2024-01-25', 'Brake Pad Replacement', 220.00, 'Replaced front brake pads.'),
+(18, '2024-07-15', 'Full Service Inspection', 130.00, 'Comprehensive check of all systems.'),
+(18, '2025-01-05', 'Oil Change', 55.00, 'Third oil change.'),
+(18, '2025-07-10', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(18, '2022-04-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(18, '2022-10-15', 'Scheduled Service', 50.00, 'Oil change and fluid check.'),
+(18, '2023-04-20', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(18, '2023-10-10', 'Suspension Check', 65.00, 'Inspected suspension components.'),
+(18, '2024-04-25', 'Oil Change', 55.00, 'Fourth oil change.'),
+(18, '2024-10-15', 'Belt Replacement', 100.00, 'Replaced serpentine belt.'),
+(18, '2025-03-20', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(18, '2025-09-01', 'Oil Change', 55.00, 'Fifth oil change.'),
+(18, '2022-06-10', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(18, '2022-12-01', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(18, '2023-06-15', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(18, '2023-12-20', 'AC Service', 120.00, 'Recharged AC system.'),
+(18, '2024-06-10', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(18, '2024-12-05', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(18, '2025-05-15', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(18, '2025-09-10', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(18, '2022-01-20', 'General Checkup', 0.00, 'General inspection.'),
+(18, '2023-08-01', 'Scheduled Service', 50.00, 'Oil change and fluid check.'),
+(19, '2021-12-10', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(19, '2022-06-01', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(19, '2022-11-20', 'Oil Change', 45.00, 'Second oil change.'),
+(19, '2023-05-15', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(19, '2023-11-01', 'Full Service Inspection', 120.00, 'Comprehensive check of all systems.'),
+(19, '2024-04-10', 'Oil Change', 50.00, 'Third oil change.'),
+(19, '2024-10-25', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(19, '2025-03-10', 'Battery Replacement', 150.00, 'Replaced battery.'),
+(19, '2025-09-01', 'Oil Change', 50.00, 'Fourth oil change.'),
+(19, '2021-08-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(19, '2022-02-25', 'Scheduled Service', 45.00, 'Oil change and fluid check.'),
+(19, '2022-08-10', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(19, '2023-02-20', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(19, '2023-08-15', 'Oil Change', 50.00, 'Fifth oil change.'),
+(19, '2024-02-10', 'Belt Replacement', 95.00, 'Replaced serpentine belt.'),
+(19, '2024-08-25', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(19, '2025-02-15', 'Oil Change', 50.00, 'Sixth oil change.'),
+(19, '2025-08-01', 'Air Filter Change', 30.00, 'Replaced air filters.'),
+(19, '2021-10-15', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(19, '2022-04-20', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(19, '2023-01-10', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(19, '2023-07-28', 'AC Service', 120.00, 'Recharged AC system.'),
+(19, '2024-01-20', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(19, '2024-07-15', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(19, '2025-01-25', 'General Checkup', 0.00, 'General inspection for safety.'),
+(20, '2023-11-20', 'Oil Change', 55.00, 'Scheduled maintenance.'),
+(20, '2024-05-15', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(20, '2024-11-01', 'Oil Change', 55.00, 'Second oil change.'),
+(20, '2025-04-25', 'Brake Pad Replacement', 250.00, 'Replaced front brake pads.'),
+(20, '2023-07-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(20, '2024-01-20', 'Scheduled Service', 55.00, 'Oil change and fluid check.'),
+(20, '2024-07-10', 'Brake Fluid Flush', 95.00, 'Flushed brake fluid.'),
+(20, '2024-12-20', 'Suspension Check', 70.00, 'Inspected suspension components.'),
+(20, '2025-06-15', 'Oil Change', 60.00, 'Third oil change.'),
+(20, '2023-08-10', 'Wiper Replacement', 25.00, 'Replaced windshield wipers.'),
+(20, '2024-02-15', 'Air Filter Replacement', 35.00, 'Replaced air filters.'),
+(20, '2024-08-01', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(20, '2025-01-30', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(20, '2025-07-20', 'AC Service', 150.00, 'Recharged AC system.'),
+(20, '2023-09-01', 'Scheduled Tire Rotation', 35.00, 'Routine maintenance.'),
+(20, '2024-03-20', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(20, '2024-09-28', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(20, '2025-03-05', 'Exhaust System Check', 50.00, 'Inspected exhaust system.'),
+(20, '2025-08-18', 'General Checkup', 0.00, 'General inspection for safety.'),
+(20, '2023-06-20', 'Initial checkup', 0.00, 'Pre-sale inspection.'),
+(20, '2024-01-10', 'Scheduled Oil Change', 55.00, 'Scheduled maintenance.'),
+(20, '2024-10-15', 'Tire Rotation', 35.00, 'Routine tire rotation.'),
+(20, '2025-05-01', 'Air Filter Change', 35.00, 'Replaced air filters.'),
+(20, '2025-09-10', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(20, '2023-09-15', 'Fluid Check', 0.00, 'Checked all fluid levels.'),
+(21, '2022-07-10', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(21, '2023-01-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(21, '2023-07-05', 'Oil Change', 45.00, 'Second oil change.'),
+(21, '2024-01-20', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(21, '2024-07-15', 'Full Service Inspection', 120.00, 'Comprehensive check of all systems.'),
+(21, '2025-01-05', 'Oil Change', 50.00, 'Third oil change.'),
+(21, '2025-07-10', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(21, '2022-04-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(21, '2022-10-15', 'Scheduled Service', 45.00, 'Oil change and fluid check.'),
+(21, '2023-04-20', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(21, '2023-10-10', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(21, '2024-04-25', 'Oil Change', 50.00, 'Fourth oil change.'),
+(21, '2024-10-15', 'Belt Replacement', 95.00, 'Replaced serpentine belt.'),
+(21, '2025-03-20', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(21, '2025-09-01', 'Oil Change', 50.00, 'Fifth oil change.'),
+(21, '2022-06-10', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(21, '2022-12-01', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(21, '2023-06-15', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(21, '2023-12-20', 'AC Service', 120.00, 'Recharged AC system.'),
+(21, '2024-06-10', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(21, '2024-12-05', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(21, '2025-05-15', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(21, '2025-09-10', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(21, '2022-01-20', 'General Checkup', 0.00, 'General inspection.'),
+(21, '2023-08-01', 'Scheduled Service', 45.00, 'Oil change and fluid check.'),
+
+(22, '2022-02-10', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(22, '2022-08-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(22, '2023-02-05', 'Oil Change', 45.00, 'Second oil change.'),
+(22, '2023-08-20', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(22, '2024-02-15', 'Full Service Inspection', 120.00, 'Comprehensive check of all systems.'),
+(22, '2024-08-01', 'Oil Change', 50.00, 'Third oil change.'),
+(22, '2025-02-25', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(22, '2025-08-10', 'Battery Replacement', 150.00, 'Replaced battery.'),
+(22, '2021-11-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(22, '2022-05-20', 'Scheduled Service', 45.00, 'Oil change and fluid check.'),
+(22, '2022-11-10', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(22, '2023-05-25', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(22, '2023-11-15', 'Oil Change', 50.00, 'Fourth oil change.'),
+(22, '2024-05-10', 'Belt Replacement', 95.00, 'Replaced serpentine belt.'),
+(22, '2024-11-20', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(22, '2025-05-15', 'Oil Change', 50.00, 'Fifth oil change.'),
+(22, '2021-12-15', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(22, '2022-06-10', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(22, '2022-12-20', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(22, '2023-06-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(22, '2023-12-05', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(22, '2024-06-25', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(22, '2024-12-10', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(22, '2025-06-01', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(22, '2025-09-10', 'General Checkup', 0.00, 'General inspection for safety.'),
+
+(23, '2023-12-10', 'Oil Change', 50.00, 'Scheduled maintenance.'),
+(23, '2024-05-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(23, '2024-11-20', 'Oil Change', 50.00, 'Second oil change.'),
+(23, '2025-05-15', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(23, '2023-09-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(23, '2024-02-20', 'Scheduled Service', 50.00, 'Oil change and fluid check.'),
+(23, '2024-08-10', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(23, '2025-02-15', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(23, '2025-08-01', 'Oil Change', 55.00, 'Third oil change.'),
+(23, '2023-10-15', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(23, '2024-04-20', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(23, '2024-10-10', 'Belt Check', 0.00, 'Checked serpentine belt condition.'),
+(23, '2025-04-25', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(23, '2025-10-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(23, '2023-11-01', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(23, '2024-04-05', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(23, '2024-09-20', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(23, '2025-03-10', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(23, '2025-09-01', 'General Checkup', 0.00, 'General inspection for safety.'),
+(23, '2023-08-10', 'Initial checkup', 0.00, 'Pre-sale inspection.'),
+(23, '2024-03-15', 'Scheduled Oil Change', 50.00, 'Scheduled maintenance.'),
+(23, '2024-09-01', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(23, '2025-04-10', 'Air Filter Change', 30.00, 'Replaced air filters.'),
+(23, '2025-10-01', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(23, '2023-10-30', 'Suspension Check', 60.00, 'Inspected suspension.'),
+
+(24, '2023-01-20', 'Oil Change', 50.00, 'Scheduled maintenance.'),
+(24, '2023-07-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(24, '2024-01-10', 'Oil Change', 50.00, 'Second oil change.'),
+(24, '2024-07-05', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(24, '2025-01-15', 'Full Service Inspection', 120.00, 'Comprehensive check of all systems.'),
+(24, '2022-11-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(24, '2023-05-20', 'Scheduled Service', 50.00, 'Oil change and fluid check.'),
+(24, '2023-11-10', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(24, '2024-05-25', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(24, '2024-11-15', 'Oil Change', 55.00, 'Third oil change.'),
+(24, '2025-05-10', 'Belt Replacement', 95.00, 'Replaced serpentine belt.'),
+(24, '2022-12-01', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(24, '2023-06-10', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(24, '2023-12-20', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(24, '2024-06-15', 'AC Service', 120.00, 'Recharged AC system.'),
+(24, '2024-12-05', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(24, '2023-02-15', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(24, '2023-08-01', 'Brake Pad Check', 0.00, 'Inspected brake pad wear.'),
+(24, '2024-02-28', 'Tire Pressure Check', 0.00, 'Checked and adjusted tire pressure.'),
+(24, '2024-08-10', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(24, '2025-02-20', 'General Checkup', 0.00, 'General inspection for safety.'),
+(24, '2025-08-01', 'Full Service Inspection', 120.00, 'Comprehensive check.'),
+(24, '2022-10-30', 'Initial checkup', 0.00, 'Pre-sale inspection.'),
+(24, '2023-04-10', 'Scheduled Oil Change', 50.00, 'Scheduled maintenance.'),
+(24, '2024-09-01', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+
+(25, '2021-11-20', 'Oil Change', 45.00, 'Scheduled maintenance.'),
+(25, '2022-05-15', 'Tire Rotation', 30.00, 'Routine tire rotation.'),
+(25, '2022-11-10', 'Oil Change', 45.00, 'Second oil change.'),
+(25, '2023-05-01', 'Brake Pad Replacement', 180.00, 'Replaced front brake pads.'),
+(25, '2023-11-20', 'Full Service Inspection', 120.00, 'Comprehensive check of all systems.'),
+(25, '2024-05-15', 'Oil Change', 50.00, 'Third oil change.'),
+(25, '2024-11-01', 'Wheel Alignment', 85.00, 'Performed wheel alignment.'),
+(25, '2025-04-20', 'Battery Replacement', 150.00, 'Replaced battery.'),
+(25, '2021-09-01', 'Initial Inspection', 0.00, 'Initial check upon purchase.'),
+(25, '2022-03-10', 'Scheduled Service', 45.00, 'Oil change and fluid check.'),
+(25, '2022-09-01', 'Brake Fluid Flush', 90.00, 'Flushed brake fluid.'),
+(25, '2023-03-15', 'Suspension Check', 60.00, 'Inspected suspension components.'),
+(25, '2023-09-01', 'Oil Change', 50.00, 'Fourth oil change.'),
+(25, '2024-03-20', 'Belt Replacement', 95.00, 'Replaced serpentine belt.'),
+(25, '2024-09-10', 'Exhaust System Check', 40.00, 'Inspected exhaust system.'),
+(25, '2025-03-01', 'Oil Change', 50.00, 'Fifth oil change.'),
+(25, '2021-10-15', 'Wiper Replacement', 20.00, 'Replaced windshield wipers.'),
+(25, '2022-04-20', 'Air Filter Replacement', 30.00, 'Replaced air filters.'),
+(25, '2022-10-10', 'Coolant Flush', 90.00, 'Coolant system flush.'),
+(25, '2023-04-25', 'AC Service', 120.00, 'Recharged AC system.'),
+(25, '2023-10-15', 'Headlight Bulb Replacement', 15.00, 'Replaced a headlight bulb.'),
+(25, '2024-04-10', 'Scheduled Tire Rotation', 30.00, 'Routine maintenance.'),
+(25, '2024-10-01', 'Brake Inspection', 0.00, 'Inspected brake system.'),
+(25, '2025-04-15', 'Pre-rental Check', 0.00, 'Final check before rental.'),
+(25, '2025-09-10', 'General Checkup', 0.00, 'General inspection for safety.');
+
+-- Recreate the Payments table with the correct schema
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Payments` (
+  `payment_id` INT NOT NULL AUTO_INCREMENT,
+  `rental_id` INT NOT NULL,
+  `amount` DECIMAL(10,2) NOT NULL,
+  `payment_date` DATE NOT NULL,
+  `payment_method` VARCHAR(45) NULL,
+  PRIMARY KEY (`payment_id`),
+  INDEX `fk_Payments_Rentals1_idx` (`rental_id` ASC),
+  CONSTRAINT `fk_Payments_Rentals1`
+    FOREIGN KEY (`rental_id`)
+    REFERENCES `car_rental_db`.`Rentals` (`rental_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+-- Data for table `car_rental_db`.`Payments`
+INSERT INTO `car_rental_db`.`Payments` (`payment_id`, `rental_id`, `amount`, `payment_date`, `payment_method`) VALUES
+(1, 1, 300.00, '2023-01-05', 'Credit Card'),
+(2, 2, 325.00, '2023-01-07', 'Cash'),
+(3, 4, 780.00, '2023-01-10', 'Online'),
+(4, 6, 385.00, '2023-01-12', 'Credit Card'),
+(5, 8, 315.00, '2023-01-15', 'Credit Card'),
+(6, 10, 480.00, '2023-01-14', 'Credit Card'),
+(7, 11, 320.00, '2023-01-18', 'Cash'),
+(8, 13, 630.00, '2023-01-20', 'Online'),
+(9, 15, 1050.00, '2023-01-22', 'Credit Card'),
+(10, 17, 980.00, '2023-01-24', 'Credit Card'),
+(11, 19, 1750.00, '2023-01-26', 'Online'),
+(12, 21, 350.00, '2023-01-28', 'Cash'),
+(13, 23, 455.00, '2023-01-30', 'Credit Card'),
+(14, 25, 490.00, '2023-02-01', 'Online'),
+(15, 1, 0.00, '2023-01-01', 'Deposit'),
+(16, 2, 0.00, '2023-01-02', 'Deposit'),
+(17, 3, 0.00, '2023-01-03', 'Deposit'),
+(18, 4, 0.00, '2023-01-04', 'Deposit'),
+(19, 5, 0.00, '2023-01-05', 'Deposit'),
+(20, 6, 0.00, '2023-01-06', 'Deposit'),
+(21, 7, 0.00, '2023-01-07', 'Deposit'),
+(22, 8, 0.00, '2023-01-08', 'Deposit'),
+(23, 9, 0.00, '2023-01-09', 'Deposit'),
+(24, 10, 0.00, '2023-01-10', 'Deposit'),
+(25, 11, 0.00, '2023-01-11', 'Deposit');
+-- ========================================
+-- DATABASE UPDATES AND NEW TABLES
+-- ========================================
+-- This section contains all updates made after the initial schema
+-- Last updated: 2025-11-17
+-- ========================================
+
+-- ========================================
+-- SECTION 1: ALTER EXISTING TABLES
+-- ========================================
+
+-- Update Cars table with pricing tiers
+ALTER TABLE `car_rental_db`.`Cars`
+ADD COLUMN `hourly_rate` DECIMAL(10,2) NULL AFTER `daily_rate`,
+ADD COLUMN `weekly_rate` DECIMAL(10,2) NULL AFTER `hourly_rate`,
+ADD COLUMN `monthly_rate` DECIMAL(10,2) NULL AFTER `weekly_rate`;
+
+-- Update existing cars with calculated rates
+UPDATE `car_rental_db`.`Cars`
+SET
+    hourly_rate = ROUND(daily_rate / 8, 2),
+    weekly_rate = ROUND(daily_rate * 6, 2),
+    monthly_rate = ROUND(daily_rate * 25, 2)
+WHERE daily_rate IS NOT NULL;
+
+-- Update Employees table with authentication fields
+ALTER TABLE `car_rental_db`.`Employees`
+ADD COLUMN `username` VARCHAR(100) UNIQUE NULL AFTER `employee_id`,
+ADD COLUMN `password` VARCHAR(255) NULL AFTER `email`;
+
+-- Update Customers table with password reset functionality
+ALTER TABLE `car_rental_db`.`Customers`
+ADD COLUMN `reset_token` VARCHAR(255) NULL AFTER `password`,
+ADD COLUMN `reset_token_expires` BIGINT NULL AFTER `reset_token`;
+
+-- Update Rentals table with due date
+ALTER TABLE `car_rental_db`.`Rentals`
+ADD COLUMN `due_date` DATE NULL AFTER `return_date`;
+
+-- Update Maintenance table with completion tracking
+ALTER TABLE `car_rental_db`.`Maintenance`
+ADD COLUMN `completion_date` DATE NULL AFTER `service_date`,
+ADD COLUMN `mileage_at_service` INT NULL AFTER `completion_date`;
+
+-- ========================================
+-- SECTION 2: NEW TABLES
+-- ========================================
+
+-- ContactMessages Table
+-- Stores messages submitted through the contact form
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`ContactMessages` (
+    `message_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `subject` VARCHAR(200) NOT NULL,
+    `message` TEXT NOT NULL,
+    `status` ENUM('unread', 'read', 'archived') DEFAULT 'unread',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `read_at` TIMESTAMP NULL,
+    INDEX `idx_status` (`status`),
+    INDEX `idx_created_at` (`created_at`)
+) ENGINE = InnoDB;
+
+-- Reviews Table
+-- Stores customer reviews and ratings for cars
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Reviews` (
+    `review_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `car_id` INT NOT NULL,
+    `customer_id` INT NOT NULL,
+    `rating` DECIMAL(2,1) NOT NULL CHECK (`rating` >= 1 AND `rating` <= 5),
+    `review_text` TEXT NULL,
+    `review_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_car_id` (`car_id`),
+    INDEX `idx_customer_id` (`customer_id`),
+    INDEX `idx_rating` (`rating`),
+    CONSTRAINT `fk_Reviews_Cars`
+        FOREIGN KEY (`car_id`)
+        REFERENCES `car_rental_db`.`Cars` (`car_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Reviews_Customers`
+        FOREIGN KEY (`customer_id`)
+        REFERENCES `car_rental_db`.`Customers` (`customer_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- FavoriteCars Table
+-- Junction table for customer favorite cars
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`FavoriteCars` (
+    `customer_id` INT NOT NULL,
+    `car_id` INT NOT NULL,
+    `added_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`customer_id`, `car_id`),
+    INDEX `idx_car_id` (`car_id`),
+    CONSTRAINT `fk_FavoriteCars_Customers`
+        FOREIGN KEY (`customer_id`)
+        REFERENCES `car_rental_db`.`Customers` (`customer_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_FavoriteCars_Cars`
+        FOREIGN KEY (`car_id`)
+        REFERENCES `car_rental_db`.`Cars` (`car_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- CustomerPaymentMethods Table
+-- Stores saved payment methods for customers
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`CustomerPaymentMethods` (
+    `payment_method_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `customer_id` INT NOT NULL,
+    `card_holder_name` VARCHAR(100) NOT NULL,
+    `card_type` VARCHAR(20) NOT NULL,
+    `masked_number` VARCHAR(20) NOT NULL,
+    `expiry_date` VARCHAR(7) NOT NULL,
+    `is_default` BOOLEAN DEFAULT FALSE,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_customer_id` (`customer_id`),
+    CONSTRAINT `fk_PaymentMethods_Customers`
+        FOREIGN KEY (`customer_id`)
+        REFERENCES `car_rental_db`.`Customers` (`customer_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- Features Table
+-- Lookup table for car features
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Features` (
+    `feature_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL UNIQUE,
+    `description` TEXT NULL,
+    `icon` VARCHAR(50) NULL
+) ENGINE = InnoDB;
+
+-- CarFeatures Table
+-- Junction table linking cars to their features
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`CarFeatures` (
+    `car_id` INT NOT NULL,
+    `feature_id` INT NOT NULL,
+    PRIMARY KEY (`car_id`, `feature_id`),
+    INDEX `idx_feature_id` (`feature_id`),
+    CONSTRAINT `fk_CarFeatures_Cars`
+        FOREIGN KEY (`car_id`)
+        REFERENCES `car_rental_db`.`Cars` (`car_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_CarFeatures_Features`
+        FOREIGN KEY (`feature_id`)
+        REFERENCES `car_rental_db`.`Features` (`feature_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- Addons Table
+-- Rental add-ons and extras (GPS, child seat, insurance, etc.)
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Addons` (
+    `addon_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `description` TEXT NULL,
+    `price` DECIMAL(10,2) NOT NULL,
+    `price_type` ENUM('daily', 'one-time') DEFAULT 'daily',
+    `is_active` BOOLEAN DEFAULT TRUE
+) ENGINE = InnoDB;
+
+-- RentalAddons Table
+-- Junction table linking rentals to selected addons
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`RentalAddons` (
+    `rental_id` INT NOT NULL,
+    `addon_id` INT NOT NULL,
+    `quantity` INT DEFAULT 1,
+    `total_price` DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (`rental_id`, `addon_id`),
+    INDEX `idx_addon_id` (`addon_id`),
+    CONSTRAINT `fk_RentalAddons_Rentals`
+        FOREIGN KEY (`rental_id`)
+        REFERENCES `car_rental_db`.`Rentals` (`rental_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_RentalAddons_Addons`
+        FOREIGN KEY (`addon_id`)
+        REFERENCES `car_rental_db`.`Addons` (`addon_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- BlogCategories Table
+-- Categories for blog posts
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`BlogCategories` (
+    `category_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL UNIQUE,
+    `slug` VARCHAR(100) NOT NULL UNIQUE,
+    `description` TEXT NULL
+) ENGINE = InnoDB;
+
+-- BlogPosts Table
+-- Blog posts and articles
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`BlogPosts` (
+    `post_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `title` VARCHAR(200) NOT NULL,
+    `slug` VARCHAR(200) NOT NULL UNIQUE,
+    `excerpt` TEXT NULL,
+    `content` LONGTEXT NOT NULL,
+    `featured_image` VARCHAR(255) NULL,
+    `author_id` INT NOT NULL,
+    `status` ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+    `published_at` TIMESTAMP NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `views` INT DEFAULT 0,
+    INDEX `idx_author_id` (`author_id`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_slug` (`slug`),
+    CONSTRAINT `fk_BlogPosts_Employees`
+        FOREIGN KEY (`author_id`)
+        REFERENCES `car_rental_db`.`Employees` (`employee_id`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- BlogPostCategories Table
+-- Junction table linking blog posts to categories
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`BlogPostCategories` (
+    `post_id` INT NOT NULL,
+    `category_id` INT NOT NULL,
+    PRIMARY KEY (`post_id`, `category_id`),
+    INDEX `idx_category_id` (`category_id`),
+    CONSTRAINT `fk_BlogPostCategories_Posts`
+        FOREIGN KEY (`post_id`)
+        REFERENCES `car_rental_db`.`BlogPosts` (`post_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_BlogPostCategories_Categories`
+        FOREIGN KEY (`category_id`)
+        REFERENCES `car_rental_db`.`BlogCategories` (`category_id`)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- Locations Table
+-- Rental locations/branches
+CREATE TABLE IF NOT EXISTS `car_rental_db`.`Locations` (
+    `location_id` INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `address` VARCHAR(255) NOT NULL,
+    `city` VARCHAR(100) NOT NULL,
+    `state` VARCHAR(2) NOT NULL,
+    `zip_code` VARCHAR(10) NOT NULL,
+    `phone` VARCHAR(20) NULL,
+    `email` VARCHAR(100) NULL,
+    `operating_hours` TEXT NULL,
+    `is_active` BOOLEAN DEFAULT TRUE,
+    INDEX `idx_city` (`city`),
+    INDEX `idx_state` (`state`)
+) ENGINE = InnoDB;
+
+-- ========================================
+-- SECTION 3: SAMPLE DATA FOR NEW TABLES
+-- ========================================
+
+-- Sample Features
+INSERT INTO `car_rental_db`.`Features` (`name`, `description`, `icon`) VALUES
+('Air Conditioning', 'Climate control system', 'snow'),
+('GPS Navigation', 'Built-in navigation system', 'location'),
+('Bluetooth', 'Wireless connectivity', 'bluetooth'),
+('Backup Camera', 'Rear-view camera system', 'camera'),
+('Sunroof', 'Panoramic or standard sunroof', 'sun'),
+('Leather Seats', 'Premium leather interior', 'chair'),
+('Heated Seats', 'Front and rear heated seats', 'fire'),
+('Cruise Control', 'Adaptive cruise control', 'speedometer'),
+('Apple CarPlay', 'Apple device integration', 'apple'),
+('Android Auto', 'Android device integration', 'android'),
+('USB Charging', 'USB ports for device charging', 'usb'),
+('Parking Sensors', 'Front and rear parking sensors', 'radar');
+
+-- Sample Addons
+INSERT INTO `car_rental_db`.`Addons` (`name`, `description`, `price`, `price_type`) VALUES
+('GPS Device', 'Portable GPS navigation device', 10.00, 'daily'),
+('Child Seat', 'Safety seat for children', 8.00, 'daily'),
+('Additional Driver', 'Add extra authorized driver', 15.00, 'one-time'),
+('Full Insurance', 'Comprehensive coverage package', 25.00, 'daily'),
+('Wifi Hotspot', 'Mobile wifi device', 12.00, 'daily'),
+('Ski Rack', 'Roof-mounted ski carrier', 15.00, 'daily'),
+('Bike Rack', 'Rear-mounted bike carrier', 12.00, 'daily'),
+('Snow Chains', 'Winter driving snow chains', 20.00, 'one-time');
+
+-- Sample Blog Categories
+INSERT INTO `car_rental_db`.`BlogCategories` (`name`, `slug`, `description`) VALUES
+('Travel Tips', 'travel-tips', 'Tips and advice for travelers'),
+('Car Maintenance', 'car-maintenance', 'Vehicle care and maintenance guides'),
+('Road Trips', 'road-trips', 'Road trip ideas and destinations'),
+('Company News', 'company-news', 'Updates from Prestige Rentals'),
+('Safety', 'safety', 'Safety tips and regulations');
+
+-- Sample Location (Houston IAH)
+INSERT INTO `car_rental_db`.`Locations` (`name`, `address`, `city`, `state`, `zip_code`, `phone`, `email`, `operating_hours`) VALUES
+('Prestige Rentals - IAH Airport', '2800 N Terminal Rd', 'Houston', 'TX', '77032', '(281) 230-3000', 'iah@prestigerentals.com', 'Mon-Sun: 5:00 AM - 12:00 AM');
+
+-- ========================================
+-- END OF DATABASE UPDATES
+-- ========================================

@@ -1,0 +1,28 @@
+	  <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+	    <div class="container">
+	      <a class="navbar-brand" href="/">Prestige<span>Rentals</span></a>
+	      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+	        <span class="oi oi-menu"></span> Menu
+	      </button>
+
+	      <div class="collapse navbar-collapse" id="ftco-nav">
+	        <ul class="navbar-nav ml-auto">
+	          <li class="nav-item <%= page_name === 'index' ? 'active' : '' %>"><a href="/" class="nav-link">Home</a></li>
+	          <li class="nav-item <%= page_name === 'about' ? 'active' : '' %>"><a href="/about" class="nav-link">About</a></li>
+	          <li class="nav-item <%= page_name === 'services' ? 'active' : '' %>"><a href="/services" class="nav-link">Services</a></li>
+	          <li class="nav-item <%= page_name === 'pricing' ? 'active' : '' %>"><a href="/pricing" class="nav-link">Pricing</a></li>
+	          <li class="nav-item <%= page_name === 'car' || page_name === 'car-single' ? 'active' : '' %>"><a href="/cars" class="nav-link">Cars</a></li>
+	          <li class="nav-item <%= page_name === 'blog' || page_name === 'blog-single' ? 'active' : '' %>"><a href="/blog" class="nav-link">Blog</a></li>
+	          <li class="nav-item <%= page_name === 'contact' ? 'active' : '' %>"><a href="/contact" class="nav-link">Contact</a></li>
+	          
+	          <% if (typeof session !== 'undefined' && session.userID) { %>
+	            <li class="nav-item <%= page_name === 'dashboard' ? 'active' : '' %>"><a href="http://localhost:4321/customer/dashboard" class="nav-link">Dashboard</a></li>
+	            <li class="nav-item"><a href="http://localhost:4321/logout" class="nav-link">Logout</a></li>
+	          <% } else { %>
+	            <li class="nav-item <%= page_name === 'login' ? 'active' : '' %>"><a href="http://localhost:4321/login" class="nav-link">Login</a></li>
+	          <% } %>
+	        </ul>
+	      </div>
+	    </div>
+	  </nav>
+    <!-- END nav -->

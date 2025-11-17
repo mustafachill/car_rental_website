@@ -1,0 +1,59 @@
+2025-09-17 22:31:45 - Employee file created. First employee registered: user
+2025-09-17 22:31:45 - Employee logged in: user
+2025-09-17 22:31:58 - user logged out.
+2025-09-17 22:32:33 - Employee logged in: user
+2025-09-17 22:37:02 - user logged out.
+2025-09-17 22:37:06 - Employee logged in: user
+2025-09-17 22:44:54 - user logged out.
+2025-09-17 22:45:14 - Customer session started: john doe (ID: 26)
+2025-09-17 22:46:03 - john doe logged out.
+2025-09-17 22:49:14 - Employee logged in: user
+2025-09-17 22:49:58 - user logged out.
+2025-09-17 22:50:48 - Customer session started: frank furter (ID: 27)
+2025-09-17 22:51:18 - frank furter logged out.
+2025-09-17 22:51:22 - Employee logged in: user
+2025-09-17 22:53:34 - user logged out.
+2025-09-17 23:09:38 - Employee logged in: user
+2025-09-17 23:17:17 - user logged out.
+2025-09-17 23:17:22 - Employee logged in: user
+2025-09-18 00:10:42 - user logged out.
+2025-09-18 00:12:08 - Customer logged in: default account (ID: 28)
+2025-09-18 00:12:19 - default account logged out.
+2025-09-18 00:12:37 - Employee logged in: user
+2025-09-18 00:19:23 - user logged out.
+2025-09-18 00:20:12 - Customer logged in: default account (ID: 29)
+2025-09-18 00:24:24 - default account logged out.
+2025-09-18 00:24:38 - Customer logged in: default account (ID: 29)
+2025-09-18 00:38:34 - default account logged out.
+2025-09-18 00:38:38 - Employee logged in: user
+2025-09-18 01:22:06 - user logged out.
+2025-09-18 01:22:10 - Employee logged in: user
+2025-09-18 01:26:33 - user logged out.
+2025-09-18 01:26:40 - Employee logged in: user
+2025-09-18 01:26:41 - user logged out.
+2025-09-18 01:26:45 - Employee logged in: user
+2025-09-18 01:30:49 - user logged out.
+2025-09-18 01:30:55 - Employee logged in: user
+2025-09-18 01:35:40 - user logged out.
+2025-09-18 01:35:45 - Employee logged in: user
+2025-09-18 01:53:45 - user logged out.
+2025-09-18 01:55:01 - Customer logged in: default account (ID: 30)
+2025-09-18 02:04:09 - default account logged out.
+2025-09-18 02:04:13 - Employee logged in: user
+2025-09-18 03:26:10 - user logged out.
+2025-09-18 03:26:17 - Employee logged in: user
+2025-09-18 03:27:47 - user logged out.
+2025-09-18 03:28:39 - Customer logged in: default account (ID: 26)
+2025-09-18 03:29:30 - default account logged out.
+2025-09-18 03:29:35 - Employee logged in: user
+2025-09-18 03:33:16 - user logged out.
+2025-09-18 03:33:26 - Customer logged in: default account (ID: 26)
+2025-09-18 03:42:04 - default account logged out.
+2025-09-18 03:42:08 - Employee logged in: user
+2025-09-18 03:56:41 - user logged out.
+2025-09-18 03:56:53 - Customer logged in: default account (ID: 26)
+2025-09-18 04:01:01 - Customer logged in: default account (ID: 26)
+2025-09-18 04:02:16 - default account logged out.
+2025-09-18 04:02:24 - Employee logged in: user
+2025-09-18 04:07:02 - user logged out.
+2025-09-18 04:24:04 - Employee logged in: user

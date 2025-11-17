@@ -19,13 +19,34 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 
+// --- EJS VIEW ENGINE SETUP ---
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
+
+// --- STATIC FILES ---
+app.use(express.static(path.join(__dirname, '../public')));
+
 // --- SECURITY MIDDLEWARE ---
 
-// Set secure HTTP headers
-app.use(helmet());
+// Set secure HTTP headers with custom CSP for Google Maps
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://www.youtube.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:", "http:"],
+            frameSrc: ["'self'", "https://www.google.com", "https://www.youtube.com"],
+            connectSrc: ["'self'"]
+        }
+    }
+}));
 
 // Configure CORS for specific origins
 const corsOptions = {
@@ -64,6 +85,42 @@ const passwordResetLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+// --- FILE UPLOAD CONFIGURATION ---
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../public/images/blog');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer for blog image uploads
+const blogImageStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        // Generate unique filename: timestamp-randomstring-originalname
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        const nameWithoutExt = path.basename(file.originalname, ext);
+        cb(null, nameWithoutExt + '-' + uniqueSuffix + ext);
+    }
+});
+
+const blogImageUpload = multer({
+    storage: blogImageStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: function (req, file, cb) {
+        // Accept images only
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+});
+
 
 const PORT = 3001;
 
@@ -75,11 +132,11 @@ if (!JWT_SECRET) {
 
 // --- DATABASE CONNECTION POOL ---
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'car_rental_db',
-    port: 3306,
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'root',
+    database: process.env.DB_NAME || 'car_rental_db',
+    port: parseInt(process.env.DB_PORT) || 8889, // MAMP MySQL port
     waitForConnections: true,
     connectionLimit: 20,
     queueLimit: 0
@@ -340,6 +397,142 @@ app.get('/api/public/testimonials', async (req, res) => {
         res.json({ success: true, testimonials: rows });
     } catch (e) {
         res.status(500).json({ success: false, error: 'Could not fetch testimonials.' });
+    }
+});
+
+// Get Published Blog Posts (with pagination)
+app.get('/api/public/blog-posts', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 9;
+        const offset = (page - 1) * limit;
+        const categorySlug = req.query.category || '';
+
+        let countSql = `
+            SELECT COUNT(DISTINCT bp.post_id) as total
+            FROM BlogPosts bp
+            WHERE bp.status = 'published'
+        `;
+        let dataSql = `
+            SELECT
+                bp.post_id,
+                bp.title,
+                bp.slug,
+                bp.excerpt,
+                bp.featured_image,
+                bp.published_at,
+                bp.views,
+                e.first_name,
+                e.last_name,
+                GROUP_CONCAT(bc.name SEPARATOR ', ') as categories
+            FROM BlogPosts bp
+            LEFT JOIN Employees e ON bp.author_id = e.employee_id
+            LEFT JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
+            LEFT JOIN BlogCategories bc ON bpc.category_id = bc.category_id
+            WHERE bp.status = 'published'
+        `;
+
+        const queryParams = [];
+
+        // Filter by category if provided
+        if (categorySlug) {
+            countSql = `
+                SELECT COUNT(DISTINCT bp.post_id) as total
+                FROM BlogPosts bp
+                INNER JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
+                INNER JOIN BlogCategories bc ON bpc.category_id = bc.category_id
+                WHERE bp.status = 'published' AND bc.slug = ?
+            `;
+            dataSql += ` AND bc.slug = ?`;
+            queryParams.push(categorySlug);
+        }
+
+        dataSql += ` GROUP BY bp.post_id ORDER BY bp.published_at DESC LIMIT ? OFFSET ?`;
+        queryParams.push(limit, offset);
+
+        const [[{ total }]] = await pool.query(countSql, categorySlug ? [categorySlug] : []);
+        const [posts] = await pool.query(dataSql, queryParams);
+
+        res.json({
+            success: true,
+            posts: posts,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalPosts: total,
+                limit: limit
+            }
+        });
+    } catch (e) {
+        console.error('Error fetching blog posts:', e);
+        res.status(500).json({ success: false, error: 'Could not fetch blog posts.' });
+    }
+});
+
+// Get Single Blog Post by slug
+app.get('/api/public/blog-posts/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+
+        const sql = `
+            SELECT
+                bp.post_id,
+                bp.title,
+                bp.slug,
+                bp.excerpt,
+                bp.content,
+                bp.featured_image,
+                bp.published_at,
+                bp.views,
+                e.first_name,
+                e.last_name,
+                e.job_title,
+                GROUP_CONCAT(bc.name SEPARATOR ', ') as categories
+            FROM BlogPosts bp
+            LEFT JOIN Employees e ON bp.author_id = e.employee_id
+            LEFT JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
+            LEFT JOIN BlogCategories bc ON bpc.category_id = bc.category_id
+            WHERE bp.slug = ? AND bp.status = 'published'
+            GROUP BY bp.post_id
+        `;
+
+        const [rows] = await pool.query(sql, [slug]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Blog post not found.' });
+        }
+
+        // Increment view count
+        await pool.query('UPDATE BlogPosts SET views = views + 1 WHERE post_id = ?', [rows[0].post_id]);
+
+        res.json({ success: true, post: rows[0] });
+    } catch (e) {
+        console.error('Error fetching blog post:', e);
+        res.status(500).json({ success: false, error: 'Could not fetch blog post.' });
+    }
+});
+
+// Get All Blog Categories
+app.get('/api/public/blog-categories', async (req, res) => {
+    try {
+        const sql = `
+            SELECT
+                bc.category_id,
+                bc.name,
+                bc.slug,
+                COUNT(bpc.post_id) as post_count
+            FROM BlogCategories bc
+            LEFT JOIN BlogPostCategories bpc ON bc.category_id = bpc.category_id
+            LEFT JOIN BlogPosts bp ON bpc.post_id = bp.post_id AND bp.status = 'published'
+            GROUP BY bc.category_id
+            ORDER BY bc.name ASC
+        `;
+
+        const [categories] = await pool.query(sql);
+        res.json({ success: true, categories: categories });
+    } catch (e) {
+        console.error('Error fetching blog categories:', e);
+        res.status(500).json({ success: false, error: 'Could not fetch blog categories.' });
     }
 });
 
@@ -1062,6 +1255,253 @@ app.delete('/api/admin/customers/:id', async (req, res) => {
 });
 
 
+// --- Admin: Blog Management ---
+
+// Get all blog posts (including drafts)
+app.get('/api/admin/blog', async (req, res) => {
+    try {
+        const sql = `
+            SELECT
+                bp.post_id,
+                bp.title,
+                bp.slug,
+                bp.excerpt,
+                bp.status,
+                bp.published_at,
+                bp.created_at,
+                bp.updated_at,
+                bp.views,
+                bp.featured_image,
+                e.first_name,
+                e.last_name,
+                GROUP_CONCAT(bc.name SEPARATOR ', ') as categories
+            FROM BlogPosts bp
+            LEFT JOIN Employees e ON bp.author_id = e.employee_id
+            LEFT JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
+            LEFT JOIN BlogCategories bc ON bpc.category_id = bc.category_id
+            GROUP BY bp.post_id
+            ORDER BY bp.created_at DESC
+        `;
+        const [posts] = await pool.query(sql);
+        res.json({ success: true, posts: posts });
+    } catch (error) {
+        console.error('Admin Get Blog Posts Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch blog posts.' });
+    }
+});
+
+// Get single blog post for editing
+app.get('/api/admin/blog/:id', async (req, res) => {
+    try {
+        const sql = `
+            SELECT
+                bp.*,
+                GROUP_CONCAT(bpc.category_id) as category_ids
+            FROM BlogPosts bp
+            LEFT JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
+            WHERE bp.post_id = ?
+            GROUP BY bp.post_id
+        `;
+        const [rows] = await pool.query(sql, [req.params.id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Blog post not found.' });
+        }
+
+        // Convert category_ids from comma-separated string to array
+        if (rows[0].category_ids) {
+            rows[0].category_ids = rows[0].category_ids.split(',').map(id => parseInt(id));
+        } else {
+            rows[0].category_ids = [];
+        }
+
+        res.json({ success: true, post: rows[0] });
+    } catch (error) {
+        console.error('Admin Get Blog Post Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch blog post.' });
+    }
+});
+
+// Create new blog post
+app.post('/api/admin/blog', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const { title, slug, excerpt, content, featured_image, status, category_ids } = req.body;
+        const author_id = req.employee.employee_id; // From authenticateAdmin middleware
+
+        // Generate slug from title if not provided
+        const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+        const sql = `
+            INSERT INTO BlogPosts (title, slug, excerpt, content, featured_image, author_id, status, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const published_at = status === 'published' ? new Date() : null;
+        const [result] = await connection.query(sql, [
+            title,
+            finalSlug,
+            excerpt || null,
+            content,
+            featured_image || null,
+            author_id,
+            status,
+            published_at
+        ]);
+
+        const post_id = result.insertId;
+
+        // Insert categories
+        if (category_ids && category_ids.length > 0) {
+            const categoryValues = category_ids.map(cat_id => [post_id, cat_id]);
+            await connection.query('INSERT INTO BlogPostCategories (post_id, category_id) VALUES ?', [categoryValues]);
+        }
+
+        await connection.commit();
+        res.status(201).json({ success: true, post_id: post_id });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Create Blog Post Error:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ success: false, error: 'A blog post with this slug already exists.' });
+        }
+        res.status(500).json({ success: false, error: 'Failed to create blog post.' });
+    } finally {
+        connection.release();
+    }
+});
+
+// Update blog post
+app.put('/api/admin/blog/:id', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const { title, slug, excerpt, content, featured_image, status, category_ids } = req.body;
+        const post_id = req.params.id;
+
+        // If publishing for the first time, set published_at
+        const [currentPost] = await connection.query('SELECT status, published_at FROM BlogPosts WHERE post_id = ?', [post_id]);
+
+        let published_at = currentPost[0].published_at;
+        if (status === 'published' && currentPost[0].status === 'draft' && !published_at) {
+            published_at = new Date();
+        }
+
+        const sql = `
+            UPDATE BlogPosts
+            SET title=?, slug=?, excerpt=?, content=?, featured_image=?, status=?, published_at=?
+            WHERE post_id=?
+        `;
+
+        await connection.query(sql, [
+            title,
+            slug,
+            excerpt || null,
+            content,
+            featured_image || null,
+            status,
+            published_at,
+            post_id
+        ]);
+
+        // Update categories
+        await connection.query('DELETE FROM BlogPostCategories WHERE post_id = ?', [post_id]);
+        if (category_ids && category_ids.length > 0) {
+            const categoryValues = category_ids.map(cat_id => [post_id, cat_id]);
+            await connection.query('INSERT INTO BlogPostCategories (post_id, category_id) VALUES ?', [categoryValues]);
+        }
+
+        await connection.commit();
+        res.json({ success: true, message: 'Blog post updated successfully.' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Update Blog Post Error:', error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ success: false, error: 'A blog post with this slug already exists.' });
+        }
+        res.status(500).json({ success: false, error: 'Failed to update blog post.' });
+    } finally {
+        connection.release();
+    }
+});
+
+// Delete blog post
+app.delete('/api/admin/blog/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM BlogPosts WHERE post_id = ?', [req.params.id]);
+        res.json({ success: true, message: 'Blog post deleted successfully.' });
+    } catch (error) {
+        console.error('Delete Blog Post Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete blog post.' });
+    }
+});
+
+// Toggle blog post publish status
+app.put('/api/admin/blog/:id/publish', async (req, res) => {
+    try {
+        const { status } = req.body; // 'published' or 'draft'
+        const post_id = req.params.id;
+
+        const [currentPost] = await pool.query('SELECT status, published_at FROM BlogPosts WHERE post_id = ?', [post_id]);
+
+        if (currentPost.length === 0) {
+            return res.status(404).json({ success: false, error: 'Blog post not found.' });
+        }
+
+        let published_at = currentPost[0].published_at;
+
+        // If publishing for the first time, set published_at
+        if (status === 'published' && !published_at) {
+            published_at = new Date();
+        }
+
+        await pool.query(
+            'UPDATE BlogPosts SET status = ?, published_at = ? WHERE post_id = ?',
+            [status, published_at, post_id]
+        );
+
+        res.json({ success: true, message: `Blog post ${status === 'published' ? 'published' : 'unpublished'} successfully.` });
+    } catch (error) {
+        console.error('Toggle Publish Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to update blog post status.' });
+    }
+});
+
+// Get all blog categories (admin)
+app.get('/api/admin/blog-categories', async (req, res) => {
+    try {
+        const [categories] = await pool.query('SELECT * FROM BlogCategories ORDER BY name ASC');
+        res.json({ success: true, categories: categories });
+    } catch (error) {
+        console.error('Admin Get Blog Categories Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch blog categories.' });
+    }
+});
+
+// Upload blog image
+app.post('/api/admin/blog/upload-image', blogImageUpload.single('image'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No image file provided.' });
+        }
+
+        // Return the public URL path
+        const imageUrl = `/images/blog/${req.file.filename}`;
+        res.json({
+            success: true,
+            imageUrl: imageUrl,
+            filename: req.file.filename
+        });
+    } catch (error) {
+        console.error('Blog Image Upload Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to upload image.' });
+    }
+});
+
+
 // --- Admin: Rental & Maintenance Management ---
 app.put('/api/admin/rentals/return/:rental_id', async (req, res) => {
     const connection = await pool.getConnection();
@@ -1210,6 +1650,704 @@ app.get('/api/admin/metrics/popular-car-types', async (req, res) => {
     }
 });
 
+
+// --- Admin: Contact Messages Management ---
+
+// Get all contact messages with optional filtering
+app.get('/api/admin/contact-messages', async (req, res) => {
+    try {
+        const status = req.query.status || ''; // Filter by status if provided
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const offset = (page - 1) * limit;
+
+        let countSql = 'SELECT COUNT(*) as total FROM ContactMessages';
+        let dataSql = 'SELECT * FROM ContactMessages';
+        const queryParams = [];
+
+        if (status) {
+            countSql += ' WHERE status = ?';
+            dataSql += ' WHERE status = ?';
+            queryParams.push(status);
+        }
+
+        dataSql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        queryParams.push(limit, offset);
+
+        const [[{ total }]] = await pool.query(countSql, status ? [status] : []);
+        const [messages] = await pool.query(dataSql, queryParams);
+
+        res.json({
+            success: true,
+            messages: messages,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalMessages: total,
+                limit: limit
+            }
+        });
+    } catch (error) {
+        console.error('Admin Get Contact Messages Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch messages.' });
+    }
+});
+
+// Update contact message status
+app.put('/api/admin/contact-messages/:id/status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['unread', 'read', 'archived'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid status. Must be: unread, read, or archived.'
+            });
+        }
+
+        const readAt = status === 'read' ? new Date() : null;
+        const sql = 'UPDATE ContactMessages SET status = ?, read_at = ? WHERE message_id = ?';
+        await pool.query(sql, [status, readAt, id]);
+
+        res.json({ success: true, message: 'Message status updated.' });
+    } catch (error) {
+        console.error('Update Contact Message Status Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to update message status.' });
+    }
+});
+
+// Delete contact message
+app.delete('/api/admin/contact-messages/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM ContactMessages WHERE message_id = ?', [id]);
+        res.json({ success: true, message: 'Message deleted successfully.' });
+    } catch (error) {
+        console.error('Delete Contact Message Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete message.' });
+    }
+});
+
+
+// =================================================================
+// VIEW ROUTES (EJS Templates for Public Pages)
+// =================================================================
+
+// Home page
+app.get('/', async (req, res) => {
+    try {
+        // Fetch featured cars, car types, locations, and blog posts in parallel
+        const [cars] = await pool.query(`
+            SELECT c.car_id, c.make, c.model, c.year, c.daily_rate, c.image_url, c.mileage,
+                   ct.type_name
+            FROM Cars c
+            JOIN Car_Types ct ON c.car_type_id = ct.car_type_id
+            WHERE c.status = 'Available'
+            ORDER BY c.car_id DESC
+            LIMIT 6
+        `);
+
+        const [carTypes] = await pool.query('SELECT * FROM Car_Types ORDER BY type_name ASC');
+        const [locations] = await pool.query('SELECT * FROM Locations ORDER BY name ASC');
+
+        // Fetch latest 3 published blog posts
+        const [blogPosts] = await pool.query(`
+            SELECT post_id, title, slug, excerpt, featured_image as image,
+                   DATE_FORMAT(published_at, '%b %d, %Y') as date
+            FROM BlogPosts
+            WHERE status = 'published'
+            ORDER BY published_at DESC
+            LIMIT 3
+        `);
+
+        // Fetch statistics for experience section
+        const [totalCarsResult] = await pool.query('SELECT COUNT(*) as total FROM Cars');
+        const [totalCustomersResult] = await pool.query('SELECT COUNT(*) as total FROM Customers');
+        const [totalLocationsResult] = await pool.query('SELECT COUNT(*) as total FROM Locations');
+
+        const stats = {
+            yearsExperience: 23,
+            totalCars: totalCarsResult[0].total,
+            happyCustomers: totalCustomersResult[0].total,
+            totalBranches: totalLocationsResult[0].total
+        };
+
+        res.render('index', {
+            title: 'Prestige Rentals - Houston Car Rental | Premium Vehicles',
+            user: null,
+            page_name: 'index',
+            featuredCars: cars,
+            carTypes: carTypes,
+            locations: locations,
+            blogs: blogPosts,
+            stats: stats
+        });
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.render('index', {
+            title: 'Prestige Rentals - Houston Car Rental | Premium Vehicles',
+            user: null,
+            page_name: 'index',
+            featuredCars: [],
+            carTypes: [],
+            locations: [],
+            blogs: [],
+            stats: {
+                yearsExperience: 23,
+                totalCars: 0,
+                happyCustomers: 0,
+                totalBranches: 0
+            }
+        });
+    }
+});
+
+// About page
+app.get('/about', async (req, res) => {
+    try {
+        // Get statistics
+        const [totalCarsResult] = await pool.query('SELECT COUNT(*) as total FROM Cars');
+        const [totalCustomersResult] = await pool.query('SELECT COUNT(*) as total FROM Customers');
+        const [totalLocationsResult] = await pool.query('SELECT COUNT(*) as total FROM Locations');
+
+        res.render('about', {
+            title: 'About - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'about',
+            stats: {
+                yearsExperience: 23,
+                totalCars: totalCarsResult[0].total,
+                happyCustomers: totalCustomersResult[0].total,
+                totalBranches: totalLocationsResult[0].total
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+        res.render('about', {
+            title: 'About - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'about',
+            stats: {
+                yearsExperience: 23,
+                totalCars: 0,
+                happyCustomers: 0,
+                totalBranches: 0
+            }
+        });
+    }
+});
+
+// Services page
+app.get('/services', (req, res) => {
+    res.render('services', {
+        title: 'Services - Prestige Rentals | Houston Car Rental',
+        user: null,
+        page_name: 'services'
+    });
+});
+
+// Pricing page
+app.get('/pricing', async (req, res) => {
+    try {
+        // Pagination parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = 8; // 8 cars per page
+        const offset = (page - 1) * limit;
+
+        // Get total count of available cars
+        const [[{ total }]] = await pool.query(`
+            SELECT COUNT(*) as total
+            FROM Cars
+            WHERE status = 'Available'
+        `);
+
+        // Get available cars with pricing tiers, ratings, and top features
+        const [cars] = await pool.query(`
+            SELECT
+                c.car_id,
+                c.make,
+                c.model,
+                c.year,
+                c.daily_rate,
+                c.hourly_rate,
+                c.weekly_rate,
+                c.monthly_rate,
+                c.image_url,
+                c.mileage,
+                ct.type_name,
+                COALESCE(AVG(r.rating), 0) as average_rating,
+                COUNT(DISTINCT r.review_id) as review_count,
+                GROUP_CONCAT(DISTINCT f.name ORDER BY f.name ASC SEPARATOR ', ') as features
+            FROM Cars c
+            JOIN Car_Types ct ON c.car_type_id = ct.car_type_id
+            LEFT JOIN Reviews r ON c.car_id = r.car_id
+            LEFT JOIN CarFeatures cf ON c.car_id = cf.car_id
+            LEFT JOIN Features f ON cf.feature_id = f.feature_id
+            WHERE c.status = 'Available'
+            GROUP BY c.car_id, c.make, c.model, c.year, c.daily_rate, c.hourly_rate,
+                     c.weekly_rate, c.monthly_rate, c.image_url, c.mileage, ct.type_name
+            ORDER BY c.daily_rate ASC
+            LIMIT ? OFFSET ?
+        `, [limit, offset]);
+
+        // Get unique car types for filtering
+        const [carTypes] = await pool.query('SELECT DISTINCT type_name FROM Car_Types ORDER BY type_name ASC');
+
+        // Calculate pagination info
+        const totalPages = Math.ceil(total / limit);
+
+        res.render('pricing', {
+            title: 'Pricing - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'pricing',
+            cars: cars,
+            carTypes: carTypes,
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalCars: total,
+                limit: limit
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching pricing:', error);
+        res.render('pricing', {
+            title: 'Pricing - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'pricing',
+            cars: [],
+            carTypes: [],
+            pagination: {
+                currentPage: 1,
+                totalPages: 1,
+                totalCars: 0,
+                limit: 8
+            }
+        });
+    }
+});
+
+// Cars listing page with filters, search and pagination
+app.get('/cars', async (req, res) => {
+    try {
+        // Get query parameters
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+        const type = req.query.type || '';
+        const location = req.query.location || '';
+        const minPrice = parseFloat(req.query.minPrice) || 0;
+        const maxPrice = parseFloat(req.query.maxPrice) || 999999;
+        const sortBy = req.query.sortBy || 'newest';
+        const pickupDate = req.query.pickupDate || '';
+        const dropoffDate = req.query.dropoffDate || '';
+
+        // Build WHERE clause
+        let whereConditions = [];
+        let queryParams = [];
+
+        if (search) {
+            whereConditions.push('(c.make LIKE ? OR c.model LIKE ?)');
+            queryParams.push(`%${search}%`, `%${search}%`);
+        }
+
+        if (type) {
+            whereConditions.push('ct.type_name = ?');
+            queryParams.push(type);
+        }
+
+        if (location) {
+            whereConditions.push('c.location_id = ?');
+            queryParams.push(location);
+        }
+
+        whereConditions.push('c.daily_rate BETWEEN ? AND ?');
+        queryParams.push(minPrice, maxPrice);
+
+        // Check for date-based availability if dates are specified
+        if (pickupDate && dropoffDate) {
+            whereConditions.push("c.status = 'Available'");
+            // Exclude cars that have overlapping rentals during the requested period
+            whereConditions.push(`
+                c.car_id NOT IN (
+                    SELECT car_id
+                    FROM Rentals
+                    WHERE status IN ('Reserved', 'Active')
+                    AND (
+                        (pickup_date <= ? AND return_date >= ?)
+                        OR (pickup_date <= ? AND return_date >= ?)
+                        OR (pickup_date >= ? AND return_date <= ?)
+                    )
+                )
+            `);
+            queryParams.push(
+                dropoffDate, pickupDate,  // New rental overlaps with start
+                pickupDate, dropoffDate,  // New rental overlaps with end
+                pickupDate, dropoffDate   // New rental is completely within period
+            );
+        }
+
+        const whereClause = whereConditions.length > 0
+            ? 'WHERE ' + whereConditions.join(' AND ')
+            : '';
+
+        // Build ORDER BY clause
+        let orderBy = 'c.car_id DESC';
+        switch(sortBy) {
+            case 'price_low':
+                orderBy = 'c.daily_rate ASC';
+                break;
+            case 'price_high':
+                orderBy = 'c.daily_rate DESC';
+                break;
+            case 'year_new':
+                orderBy = 'c.year DESC';
+                break;
+            case 'year_old':
+                orderBy = 'c.year ASC';
+                break;
+            case 'newest':
+            default:
+                orderBy = 'c.car_id DESC';
+        }
+
+        // Get total count for pagination
+        const [countResult] = await pool.query(`
+            SELECT COUNT(*) as total
+            FROM Cars c
+            JOIN Car_Types ct ON c.car_type_id = ct.car_type_id
+            ${whereClause}
+        `, queryParams);
+
+        const totalCars = countResult[0].total;
+        const totalPages = Math.ceil(totalCars / limit);
+
+        // Get cars with pagination
+        const [cars] = await pool.query(`
+            SELECT c.car_id, c.make, c.model, c.year, c.daily_rate, c.image_url, c.mileage, c.status,
+                   ct.type_name
+            FROM Cars c
+            JOIN Car_Types ct ON c.car_type_id = ct.car_type_id
+            ${whereClause}
+            ORDER BY ${orderBy}
+            LIMIT ? OFFSET ?
+        `, [...queryParams, limit, offset]);
+
+        // Get all car types and locations for filter dropdowns
+        const [carTypes] = await pool.query('SELECT DISTINCT type_name FROM Car_Types ORDER BY type_name');
+        const [locations] = await pool.query('SELECT * FROM Locations ORDER BY name ASC');
+
+        res.render('car', {
+            title: 'Cars - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'car',
+            cars: cars,
+            carTypes: carTypes,
+            locations: locations,
+            currentPage: page,
+            totalPages: totalPages,
+            totalCars: totalCars,
+            filters: {
+                search: search,
+                type: type,
+                location: location,
+                minPrice: minPrice > 0 ? minPrice : '',
+                maxPrice: maxPrice < 999999 ? maxPrice : '',
+                sortBy: sortBy,
+                pickupDate: pickupDate,
+                dropoffDate: dropoffDate
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching cars:', error);
+        res.render('car', {
+            title: 'Cars - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'car',
+            cars: [],
+            carTypes: [],
+            locations: [],
+            currentPage: 1,
+            totalPages: 1,
+            totalCars: 0,
+            filters: {
+                search: '',
+                type: '',
+                location: '',
+                minPrice: '',
+                maxPrice: '',
+                sortBy: 'newest',
+                pickupDate: '',
+                dropoffDate: ''
+            }
+        });
+    }
+});
+
+// Single car detail page
+app.get('/car/:id', async (req, res) => {
+    try {
+        const [carRows] = await pool.query(`
+            SELECT c.*, ct.type_name
+            FROM Cars c
+            JOIN Car_Types ct ON c.car_type_id = ct.car_type_id
+            WHERE c.car_id = ?
+        `, [req.params.id]);
+
+        if (carRows.length === 0) {
+            return res.status(404).render('404', {
+                title: 'Car Not Found - Prestige Rentals | Houston Car Rental',
+                user: null,
+                page_name: 'car'
+            });
+        }
+
+        const car = carRows[0];
+
+        // Fetch features for this car
+        const [features] = await pool.query(`
+            SELECT f.name as feature_name
+            FROM CarFeatures cf
+            JOIN Features f ON cf.feature_id = f.feature_id
+            WHERE cf.car_id = ?
+        `, [req.params.id]);
+
+        // Fetch reviews for this car
+        const [reviews] = await pool.query(`
+            SELECT r.rating, r.review_text as comment, r.review_date as created_at,
+                   c.first_name, c.last_name
+            FROM Reviews r
+            JOIN Customers c ON r.customer_id = c.customer_id
+            WHERE r.car_id = ?
+            ORDER BY r.review_date DESC
+        `, [req.params.id]);
+
+        // Fetch related cars (same type, different car)
+        const [relatedCars] = await pool.query(`
+            SELECT c.car_id, c.make, c.model, c.daily_rate, c.image_url
+            FROM Cars c
+            WHERE c.car_type_id = ? AND c.car_id != ? AND c.status = 'Available'
+            LIMIT 3
+        `, [car.car_type_id, req.params.id]);
+
+        res.render('car-single', {
+            title: `${car.make} ${car.model} - Prestige Rentals | Houston Car Rental`,
+            user: null,
+            page_name: 'car',
+            car: car,
+            features: features,
+            reviews: reviews,
+            relatedCars: relatedCars
+        });
+    } catch (error) {
+        console.error('Error fetching car details:', error);
+        res.status(500).render('404', {
+            title: 'Error - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'car'
+        });
+    }
+});
+
+// Blog listing page
+app.get('/blog', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 9;
+        const offset = (page - 1) * limit;
+
+        // Get total count of published posts
+        const [[{ total }]] = await pool.query(
+            'SELECT COUNT(*) as total FROM BlogPosts WHERE status = "published"'
+        );
+
+        // Get published blog posts with author info
+        const sql = `
+            SELECT
+                bp.post_id,
+                bp.title,
+                bp.slug,
+                bp.excerpt,
+                bp.featured_image,
+                bp.published_at,
+                e.first_name,
+                e.last_name
+            FROM BlogPosts bp
+            LEFT JOIN Employees e ON bp.author_id = e.employee_id
+            WHERE bp.status = 'published'
+            ORDER BY bp.published_at DESC
+            LIMIT ? OFFSET ?
+        `;
+        const [blogs] = await pool.query(sql, [limit, offset]);
+
+        // Format the data for the view
+        const formattedBlogs = blogs.map(blog => ({
+            id: blog.post_id,
+            title: blog.title,
+            excerpt: blog.excerpt || 'No excerpt available...',
+            image: blog.featured_image || '/images/image_1.jpg',
+            date: new Date(blog.published_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            }),
+            slug: blog.slug
+        }));
+
+        const totalPages = Math.ceil(total / limit);
+
+        res.render('blog', {
+            title: 'Blog - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'blog',
+            blogs: formattedBlogs,
+            currentPage: page,
+            totalPages: totalPages,
+            totalBlogs: total
+        });
+    } catch (error) {
+        console.error('Error fetching blog posts:', error);
+        res.status(500).render('error', {
+            title: 'Error - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'error',
+            message: 'Failed to load blog posts'
+        });
+    }
+});
+
+// Single blog post page
+app.get('/blog/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+
+        const sql = `
+            SELECT
+                bp.post_id,
+                bp.title,
+                bp.slug,
+                bp.excerpt,
+                bp.content,
+                bp.featured_image,
+                bp.published_at,
+                bp.views,
+                e.first_name,
+                e.last_name,
+                e.job_title,
+                GROUP_CONCAT(bc.name SEPARATOR ', ') as categories
+            FROM BlogPosts bp
+            LEFT JOIN Employees e ON bp.author_id = e.employee_id
+            LEFT JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
+            LEFT JOIN BlogCategories bc ON bpc.category_id = bc.category_id
+            WHERE bp.slug = ? AND bp.status = 'published'
+            GROUP BY bp.post_id
+        `;
+
+        const [rows] = await pool.query(sql, [slug]);
+
+        if (rows.length === 0) {
+            return res.status(404).render('error', {
+                title: 'Blog Post Not Found - Prestige Rentals | Houston Car Rental',
+                user: null,
+                page_name: 'error',
+                message: 'The blog post you are looking for does not exist.'
+            });
+        }
+
+        const post = rows[0];
+
+        // Increment view count
+        await pool.query('UPDATE BlogPosts SET views = views + 1 WHERE post_id = ?', [post.post_id]);
+
+        // Format data for the view
+        const formattedPost = {
+            id: post.post_id,
+            title: post.title,
+            content: post.content,
+            excerpt: post.excerpt,
+            image: post.featured_image || '/images/image_1.jpg',
+            author: `${post.first_name} ${post.last_name}`,
+            author_title: post.job_title || 'Author',
+            date: new Date(post.published_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }),
+            views: post.views + 1,
+            categories: post.categories || 'Uncategorized'
+        };
+
+        res.render('blog-single', {
+            title: `${post.title} - Prestige Rentals Blog`,
+            user: null,
+            page_name: 'blog',
+            post: formattedPost
+        });
+    } catch (error) {
+        console.error('Error fetching blog post:', error);
+        res.status(500).render('error', {
+            title: 'Error - Prestige Rentals | Houston Car Rental',
+            user: null,
+            page_name: 'error',
+            message: 'Failed to load blog post'
+        });
+    }
+});
+
+// Contact page
+app.get('/contact', (req, res) => {
+    res.render('contact', {
+        title: 'Contact - Prestige Rentals | Houston Car Rental',
+        user: null,
+        page_name: 'contact'
+    });
+});
+
+// Contact form submission (public endpoint)
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+
+        // Validation
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({
+                success: false,
+                error: 'All fields are required.'
+            });
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Please provide a valid email address.'
+            });
+        }
+
+        // Insert into database
+        const sql = 'INSERT INTO ContactMessages (name, email, subject, message) VALUES (?, ?, ?, ?)';
+        const [result] = await pool.query(sql, [name, email, subject, message]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Thank you for contacting us! We will get back to you soon.',
+            messageId: result.insertId
+        });
+    } catch (error) {
+        console.error('Contact Form Submission Error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to send message. Please try again later.'
+        });
+    }
+});
+
+// =================================================================
+// END VIEW ROUTES
+// =================================================================
 
 // --- START SERVER ---
 app.listen(PORT, () => {

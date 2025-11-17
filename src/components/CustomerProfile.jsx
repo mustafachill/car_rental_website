@@ -35,7 +35,8 @@ export default function CustomerProfile() {
         } else {
             // NEW: If either is missing, log the user out
             sessionStorage.clear();
-            window.location.href = '/'; 
+            const returnUrl = window.location.pathname;
+            window.location.href = `/login?return=${encodeURIComponent(returnUrl)}`;
         }
     }, []);
 

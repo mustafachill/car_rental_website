@@ -158,10 +158,20 @@ function CustomerLoginForm({ setError }) {
                 try {
                     sessionStorage.setItem('customerUser', JSON.stringify(data.user));
                     sessionStorage.setItem('customerToken', data.token); // <-- ****** THE FIX ******
-                    
+
                     console.log("User data and token stored in sessionStorage."); // <-- UPDATED LOG
-                    console.log("Attempting redirect to /customer/dashboard...");
-                    window.location.href = '/customer/dashboard';
+
+                    // Check if there's a return URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('return');
+
+                    if (returnUrl) {
+                        console.log("Redirecting to return URL:", returnUrl);
+                        window.location.href = returnUrl;
+                    } else {
+                        console.log("Attempting redirect to /customer/dashboard...");
+                        window.location.href = '/customer/dashboard';
+                    }
                 } catch (storageError) {
                     console.error("Error saving to sessionStorage:", storageError);
                     setError("Failed to save login session.");

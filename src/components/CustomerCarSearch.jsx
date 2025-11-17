@@ -40,7 +40,8 @@ export default function CustomerCarSearch() {
             setToken(tokenString);
         } else {
             sessionStorage.clear();
-            window.location.href = '/login';
+            const returnUrl = window.location.pathname;
+            window.location.href = `/login?return=${encodeURIComponent(returnUrl)}`;
         }
     }, []);
 

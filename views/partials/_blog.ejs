@@ -1,0 +1,98 @@
+<section class="ftco-section bg-light">
+  <div class="container">
+    <div class="row">
+      <% if (typeof blogs !== 'undefined' && blogs.length > 0) { %>
+        <% blogs.forEach(function(blog) { %>
+          <!-- Blog Card -->
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="blog-card h-100 bg-white rounded shadow-sm" style="overflow: hidden; transition: transform 0.3s ease;">
+              <a href="/blog/<%= blog.slug %>" class="d-block">
+                <div class="blog-img" style="background-image: url('<%= blog.image %>'); height: 220px; background-size: cover; background-position: center;"></div>
+              </a>
+              <div class="p-4">
+                <div class="meta mb-3 d-flex justify-content-between text-muted" style="font-size: 13px;">
+                  <span><i class="icon-calendar mr-1"></i> <%= blog.date %></span>
+                </div>
+                <h4 class="heading" style="font-size: 18px; line-height: 1.4;">
+                  <a href="/blog/<%= blog.slug %>" class="text-dark"><%= blog.title %></a>
+                </h4>
+                <p class="text-muted mb-3" style="font-size: 14px; line-height: 1.6;">
+                  <%= blog.excerpt %>
+                </p>
+                <a href="/blog/<%= blog.slug %>" class="btn btn-primary btn-sm">
+                  Read More <i class="icon-long-arrow-right ml-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div class="col-md-12">
+          <p class="text-center">No blog posts available at the moment.</p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Pagination -->
+    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="row mt-5">
+      <div class="col text-center">
+        <div class="block-27">
+          <ul>
+            <!-- Previous Button -->
+            <% if (currentPage > 1) { %>
+              <li><a href="?page=<%= currentPage - 1 %>">&lt;</a></li>
+            <% } else { %>
+              <li class="disabled"><span>&lt;</span></li>
+            <% } %>
+
+            <!-- Page Numbers -->
+            <%
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) { %>
+              <% if (i === currentPage) { %>
+                <li class="active"><span><%= i %></span></li>
+              <% } else { %>
+                <li><a href="?page=<%= i %>"><%= i %></a></li>
+              <% } %>
+            <% } %>
+
+            <!-- Next Button -->
+            <% if (currentPage < totalPages) { %>
+              <li><a href="?page=<%= currentPage + 1 %>">&gt;</a></li>
+            <% } else { %>
+              <li class="disabled"><span>&gt;</span></li>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<style>
+.blog-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+.blog-card .blog-img {
+  transition: transform 0.3s ease;
+}
+
+.blog-card:hover .blog-img {
+  transform: scale(1.05);
+}
+
+.blog-card h4 a {
+  transition: color 0.3s ease;
+}
+
+.blog-card h4 a:hover {
+  color: #1089ff !important;
+  text-decoration: none;
+}
+</style>

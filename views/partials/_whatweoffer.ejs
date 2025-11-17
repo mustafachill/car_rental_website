@@ -1,0 +1,83 @@
+<section class="ftco-section bg-light">
+	<div class="container">
+		<div class="row">
+			<% if (typeof cars !== 'undefined' && cars.length > 0) { %>
+				<% cars.forEach(function(car) { %>
+					<div class="col-md-4">
+						<div class="car-wrap rounded ftco-animate">
+							<div class="img rounded d-flex align-items-end" style="background-image: url(<%= car.image_url || 'images/car-1.jpg' %>);">
+							</div>
+							<div class="text">
+								<h2 class="mb-0"><a href="/car/<%= car.car_id %>"><%= car.make %> <%= car.model %></a></h2>
+								<div class="d-flex mb-3">
+									<span class="cat"><%= car.type_name || 'Sedan' %></span>
+									<p class="price ml-auto">$<%= car.daily_rate %> <span>/day</span></p>
+								</div>
+								<p class="d-flex mb-0 d-block">
+									<a href="http://localhost:4321/customer/rent/<%= car.car_id %>" class="btn btn-primary py-2 mr-1">Book now</a>
+									<a href="/car/<%= car.car_id %>" class="btn btn-secondary py-2 ml-1">Details</a>
+								</p>
+							</div>
+						</div>
+					</div>
+				<% }); %>
+			<% } else { %>
+				<div class="col-md-12">
+					<p class="text-center">No cars available at the moment.</p>
+				</div>
+			<% } %>
+		</div>
+
+		<!-- Pagination -->
+		<% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+		<div class="row mt-5">
+			<div class="col text-center">
+				<div class="block-27">
+					<ul>
+						<%
+						// Build query string for pagination links
+						let queryParams = [];
+						if (filters.search) queryParams.push('search=' + encodeURIComponent(filters.search));
+						if (filters.type) queryParams.push('type=' + encodeURIComponent(filters.type));
+						if (filters.location) queryParams.push('location=' + encodeURIComponent(filters.location));
+						if (filters.minPrice) queryParams.push('minPrice=' + encodeURIComponent(filters.minPrice));
+						if (filters.maxPrice) queryParams.push('maxPrice=' + encodeURIComponent(filters.maxPrice));
+						if (filters.pickupDate) queryParams.push('pickupDate=' + encodeURIComponent(filters.pickupDate));
+						if (filters.dropoffDate) queryParams.push('dropoffDate=' + encodeURIComponent(filters.dropoffDate));
+						if (filters.sortBy) queryParams.push('sortBy=' + encodeURIComponent(filters.sortBy));
+						let queryString = queryParams.length > 0 ? '&' + queryParams.join('&') : '';
+						%>
+
+						<!-- Previous Button -->
+						<% if (currentPage > 1) { %>
+							<li><a href="?page=<%= currentPage - 1 %><%= queryString %>">&lt;</a></li>
+						<% } else { %>
+							<li class="disabled"><span>&lt;</span></li>
+						<% } %>
+
+						<!-- Page Numbers -->
+						<%
+						let startPage = Math.max(1, currentPage - 2);
+						let endPage = Math.min(totalPages, currentPage + 2);
+
+						for (let i = startPage; i <= endPage; i++) { %>
+							<% if (i === currentPage) { %>
+								<li class="active"><span><%= i %></span></li>
+							<% } else { %>
+								<li><a href="?page=<%= i %><%= queryString %>"><%= i %></a></li>
+							<% } %>
+						<% } %>
+
+						<!-- Next Button -->
+						<% if (currentPage < totalPages) { %>
+							<li><a href="?page=<%= currentPage + 1 %><%= queryString %>">&gt;</a></li>
+						<% } else { %>
+							<li class="disabled"><span>&gt;</span></li>
+						<% } %>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<% } %>
+	</div>
+</section>

@@ -1,0 +1,167 @@
+<!-- HEADER -->
+<%- include('partials/_header'); %>
+<!-- NAVBAR -->
+<%- include('partials/_navbar'); %>
+
+    <section class="hero-wrap hero-wrap-2 js-fullheight" style="background-image: url('/images/bg_3.jpg');" data-stellar-background-ratio="0.5">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="row no-gutters slider-text js-fullheight align-items-end justify-content-start">
+          <div class="col-md-9 ftco-animate pb-5">
+          	<p class="breadcrumbs">
+              <span class="mr-2"><a href="/">Home <i class="ion-ios-arrow-forward"></i></a></span>
+              <span class="mr-2"><a href="/blog">Blog <i class="ion-ios-arrow-forward"></i></a></span>
+              <span>Blog Post <i class="ion-ios-arrow-forward"></i></span>
+            </p>
+            <h1 class="mb-3 bread"><%= post.title %></h1>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ftco-section ftco-degree-bg">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-8 ftco-animate">
+            <!-- Blog Post Header -->
+            <div class="mb-4">
+              <p class="text-muted">
+                <i class="icon-calendar mr-2"></i>Published on <%= post.date %>
+                <span class="mx-3">|</span>
+                <i class="icon-eye mr-2"></i><%= post.views %> views
+                <span class="mx-3">|</span>
+                <i class="icon-tag mr-2"></i><%= post.categories %>
+              </p>
+            </div>
+
+            <!-- Featured Image -->
+            <% if (post.image) { %>
+              <div class="mb-4">
+                <img src="<%= post.image %>" alt="<%= post.title %>" class="img-fluid rounded">
+              </div>
+            <% } %>
+
+            <!-- Blog Content -->
+            <div class="blog-content mb-5">
+              <%- post.content %>
+            </div>
+
+            <!-- Author Info -->
+            <div class="about-author d-flex p-4 bg-light rounded shadow-sm mb-5">
+              <div class="desc">
+                <h4 class="mb-2"><%= post.author %></h4>
+                <p class="mb-0 text-muted"><%= post.author_title %></p>
+              </div>
+            </div>
+
+          </div> <!-- .col-md-8 -->
+
+          <!-- Sidebar -->
+          <div class="col-md-4 sidebar ftco-animate">
+
+            <div class="sidebar-box ftco-animate">
+              <h3>Categories</h3>
+              <div class="categories">
+                <li><a href="/blog?category=car-rental-tips">Car Rental Tips</a></li>
+                <li><a href="/blog?category=travel-guides">Travel Guides</a></li>
+                <li><a href="/blog?category=vehicle-maintenance">Vehicle Maintenance</a></li>
+                <li><a href="/blog?category=company-news">Company News</a></li>
+                <li><a href="/blog?category=driving-safety">Driving Safety</a></li>
+                <li><a href="/blog?category=road-trips">Road Trips</a></li>
+              </div>
+            </div>
+
+            <div class="sidebar-box ftco-animate">
+              <h3>Back to Blog</h3>
+              <p>
+                <a href="/blog" class="btn btn-primary py-2 px-4">
+                  <i class="icon-arrow-left mr-2"></i>View All Posts
+                </a>
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section> <!-- .section -->
+
+<style>
+.blog-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+  font-weight: 600;
+}
+
+.blog-content p {
+  margin-bottom: 1.2em;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-bottom: 1.5em;
+  padding-left: 2em;
+}
+
+.blog-content li {
+  margin-bottom: 0.5em;
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+  border-radius: 8px;
+}
+
+.blog-content blockquote {
+  border-left: 4px solid #1089ff;
+  padding-left: 1.5em;
+  margin: 1.5em 0;
+  font-style: italic;
+  color: #666;
+}
+
+.blog-content code {
+  background-color: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.blog-content pre {
+  background-color: #f4f4f4;
+  padding: 1em;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.blog-content a {
+  color: #1089ff;
+  text-decoration: none;
+}
+
+.blog-content a:hover {
+  text-decoration: underline;
+}
+
+.about-author {
+  border-left: 4px solid #1089ff;
+}
+</style>
+
+<!-- FOOTER -->
+<%- include('partials/_footer'); %>

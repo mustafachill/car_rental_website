@@ -8,6 +8,8 @@ import EmployeeManager from './EmployeeManager.jsx';
 import CustomerManager from './CustomerManager.jsx';
 import RentalManager from './RentalManager.jsx';
 import MaintenanceManager from './MaintenanceManager.jsx';
+import BlogManager from './BlogManager.jsx';
+import ContactMessageManager from './ContactMessageManager.jsx';
 // This is just the little sun/moon icon button for dark mode
 import ThemeToggleButton from '../ThemeToggleButton.jsx'; 
 
@@ -78,6 +80,10 @@ export default function AdminDashboard() {
                 return <CustomerManager />;
             case 'rentals':
                 return <RentalManager />;
+            case 'blog':
+                return <BlogManager />;
+            case 'contact-messages':
+                return <ContactMessageManager />;
             default:
                 // If something goes wrong, just show the metrics page
                 return <MetricsDashboard />;
@@ -145,6 +151,8 @@ export default function AdminDashboard() {
                         <NavButton viewName="employees" label="Manage Employees" />
                         <NavButton viewName="customers" label="Manage Customers" />
                         <NavButton viewName="rentals" label="Manage Rentals" />
+                        <NavButton viewName="blog" label="Manage Blog" />
+                        <NavButton viewName="contact-messages" label="Contact Messages" />
                     </div>
                 </nav>
             </header>

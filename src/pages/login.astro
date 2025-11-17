@@ -2,6 +2,19 @@
 import LoginForm from '../components/LoginForm.jsx';
 import ThemeManager from '../components/ThemeManager.astro';
 import ThemeToggleButton from '../components/ThemeToggleButton.jsx';
+
+// Check for existing session in cookies
+const adminToken = Astro.cookies.get('adminToken');
+const userToken = Astro.cookies.get('userToken');
+
+// If user is already logged in, redirect to appropriate dashboard
+if (adminToken && adminToken.value) {
+  return Astro.redirect('/admin/dashboard');
+}
+
+if (userToken && userToken.value) {
+  return Astro.redirect('/customer/dashboard');
+}
 ---
 <html lang="en" class="h-full">
 <head>
@@ -19,5 +32,24 @@ import ThemeToggleButton from '../components/ThemeToggleButton.jsx';
         </header>
         <main> <LoginForm client:load /> </main>
     </div>
+
+    <!-- Client-side session check for localStorage and sessionStorage tokens -->
+    <script>
+        // Check localStorage and sessionStorage for tokens
+        if (typeof window !== 'undefined') {
+            // Check admin token (localStorage)
+            const adminToken = localStorage.getItem('adminToken');
+
+            // Check customer token (sessionStorage or localStorage)
+            const customerTokenSession = sessionStorage.getItem('customerToken');
+            const userToken = localStorage.getItem('userToken');
+
+            if (adminToken) {
+                window.location.href = '/admin/dashboard';
+            } else if (customerTokenSession || userToken) {
+                window.location.href = '/customer/dashboard';
+            }
+        }
+    </script>
 </body>
 </html>
