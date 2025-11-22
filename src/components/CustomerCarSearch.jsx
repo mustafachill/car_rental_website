@@ -450,7 +450,7 @@ const CarDetailModal = ({ car, onClose, customerId, token }) => {
                                 <div className="grid grid-cols-2 gap-4 text-gray-700 dark:text-gray-300">
                                     <p><strong>Type:</strong> {details.type_name}</p>
                                     <p><strong>Year:</strong> {details.year}</p>
-                                    <p><strong>Mileage:</strong> {details.mileage.toLocaleString()} miles</p>
+                                    <p><strong>Mileage:</strong> {details.mileage ? details.mileage.toLocaleString() : 'N/A'} miles</p>
                                     <p><strong>Status:</strong> <span className="font-semibold text-green-500">{details.status}</span></p>
                                 </div>
                             </div>

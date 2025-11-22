@@ -63,16 +63,15 @@ const EmployeeFormModal = ({ employee, onClose, onSave }) => {
             : 'http://localhost:3001/api/admin/employees';
         const method = employee ? 'PUT' : 'POST';
 
-        // **Hey team, big note here!**
-        // Notice we're using a standard 'fetch' call. This is different
-        // from our other forms (like CarManager) that use 'adminApiPut' or 'adminApiPost'.
-        // This 'fetch' call is **NOT** sending our admin auth token!
-        // This will probably fail if the route is protected. We should
-        // definitely look at swapping this out for our 'apiHelper' functions.
+        // Using fetch with Authorization header for employee CRUD operations
         try {
+            const token = localStorage.getItem('adminToken');
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(payload),
             });
             const data = await res.json(); // Get the server's response

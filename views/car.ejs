@@ -49,11 +49,13 @@
     											class="form-control"
     											style="border-radius: 5px; padding: 12px 15px; border: 1px solid #dee2e6;">
     										<option value="">All Types</option>
-    										<% carTypes.forEach(function(ct) { %>
-    											<option value="<%= ct.type_name %>" <%= filters.type === ct.type_name ? 'selected' : '' %>>
-    												<%= ct.type_name %>
-    											</option>
-    										<% }); %>
+    										<% if (typeof carTypes !== 'undefined' && carTypes.length > 0) { %>
+    											<% carTypes.forEach(function(ct) { %>
+    												<option value="<%= ct.type_name %>" <%= filters.type === ct.type_name ? 'selected' : '' %>>
+    													<%= ct.type_name %>
+    												</option>
+    											<% }); %>
+    										<% } %>
     									</select>
     								</div>
     							</div>

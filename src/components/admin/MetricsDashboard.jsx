@@ -115,7 +115,7 @@ const ChartCard = ({ title, chartType, chartData, loading }) => {
         // It runs *after* the component renders, and again if 'chartData' changes.
         
         // Safety check: if we don't have the canvas or any data, just stop.
-        if (!chartRef.current || !chartData || chartData.datasets[0].data.length === 0) return;
+        if (!chartRef.current || !chartData || !chartData.datasets || !chartData.datasets[0] || chartData.datasets[0].data.length === 0) return;
 
         // **THIS IS THE KEY!**
         // Before we draw a new chart, we check if a chart *instance*

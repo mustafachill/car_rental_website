@@ -102,7 +102,7 @@ export default function RentalFlow({ carId }) {
     
     const handleAddonsUpdate = (newAddons) => {
         setSelectedAddons(newAddons);
-        calculateCost(rentalDetails.pickupDate, newDetails.dueDate, newAddons);
+        calculateCost(rentalDetails.pickupDate, rentalDetails.dueDate, newAddons);
     };
 
     // Final callback when payment is successful
@@ -151,7 +151,7 @@ const CarDetailsStep = ({ car, rentalDetails, totalCost, onDateChange, onProceed
                 <img src={car.image_url || 'https://placehold.co/600x400/222/FFF?text=No+Image'} alt={`${car.make} ${car.model}`} className="w-full aspect-video object-contain rounded-lg mb-4 bg-gray-200 dark:bg-gray-700" />
                 <p><strong>Type:</strong> {car.type_name}</p>
                 <p><strong>Year:</strong> {car.year}</p>
-                <p><strong>Mileage:</strong> {car.mileage.toLocaleString()}</p>
+                <p><strong>Mileage:</strong> {car.mileage ? car.mileage.toLocaleString() : 'N/A'}</p>
                 <p className="text-2xl font-bold text-green-500 mt-4">${car.daily_rate}/day</p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">

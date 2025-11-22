@@ -32,9 +32,11 @@ export default function LoginForm() {
             <div className="w-full">
                 {/* Logo/Header */}
                 <div className="text-center mb-4 sm:mb-6">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl text-prestige-dark dark:text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                        Prestige<span className="text-prestige-green">Rentals</span>
-                    </h1>
+                    <a href="http://localhost:3001" className="inline-block hover:opacity-80 transition-opacity">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl text-prestige-dark dark:text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                            Prestige<span className="text-prestige-green">Rentals</span>
+                        </h1>
+                    </a>
                     <p className="text-prestige-gray dark:text-gray-400 mt-2 text-sm sm:text-base">
                         Login or create an account to continue.
                     </p>

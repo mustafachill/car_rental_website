@@ -1329,7 +1329,7 @@ app.post('/api/admin/blog', async (req, res) => {
         await connection.beginTransaction();
 
         const { title, slug, excerpt, content, featured_image, status, category_ids } = req.body;
-        const author_id = req.employee.employee_id; // From authenticateAdmin middleware
+        const author_id = req.user.id; // From authenticateAdmin middleware (JWT payload has 'id')
 
         // Generate slug from title if not provided
         const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

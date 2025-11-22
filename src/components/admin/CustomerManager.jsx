@@ -520,9 +520,9 @@ const CustomerDetailModal = ({ isOpen, customer, onClose }) => {
                     // 'Promise.all' would just stop and throw an error if *any* of them failed.
                     // This way, we can still show rental history even if favorites fails to load.
                     const apiResults = await Promise.allSettled([
-                        fetch(`http://localhost:3001/api/customers/${customer.customer_id}/payment-methods`),
-                        fetch(`http://localhost:3001/api/customers/${customer.customer_id}/favorites`),
-                        fetch(`http://localhost:3001/api/customers/${customer.customer_id}/rental-history`),
+                        fetch(`http://localhost:3001/api/admin/customers/${customer.customer_id}/payment-methods`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                        fetch(`http://localhost:3001/api/admin/customers/${customer.customer_id}/favorites`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                        fetch(`http://localhost:3001/api/admin/customers/${customer.customer_id}/rental-history`, { headers: { 'Authorization': `Bearer ${token}` } }),
                     ]);
 
                     // This is a helper function to safely get the JSON data
