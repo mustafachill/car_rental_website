@@ -38,11 +38,11 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://www.youtube.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://maps.googleapis.com", "https://www.youtube.com", "https://unpkg.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://unpkg.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:", "http:"],
-            frameSrc: ["'self'", "https://www.google.com", "https://www.youtube.com"],
+            frameSrc: ["'self'", "https://www.google.com", "https://maps.google.com", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
             connectSrc: ["'self'"]
         }
     }
@@ -1280,7 +1280,7 @@ app.get('/api/admin/blog', async (req, res) => {
             LEFT JOIN BlogPostCategories bpc ON bp.post_id = bpc.post_id
             LEFT JOIN BlogCategories bc ON bpc.category_id = bc.category_id
             GROUP BY bp.post_id
-            ORDER BY bp.created_at DESC
+            ORDER BY bp.created_at DESC, bp.post_id DESC
         `;
         const [posts] = await pool.query(sql);
         res.json({ success: true, posts: posts });

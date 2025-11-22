@@ -10,8 +10,7 @@ import RentalManager from './RentalManager.jsx';
 import MaintenanceManager from './MaintenanceManager.jsx';
 import BlogManager from './BlogManager.jsx';
 import ContactMessageManager from './ContactMessageManager.jsx';
-// This is just the little sun/moon icon button for dark mode
-import ThemeToggleButton from '../ThemeToggleButton.jsx'; 
+import ThemeToggleButton from '../ThemeToggleButton.jsx';
 
 // This is the main dashboard component
 export default function AdminDashboard() {
@@ -130,12 +129,24 @@ export default function AdminDashboard() {
                     </div>
                     
                     {/* Right-side buttons */}
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3">
                         <ThemeToggleButton />
+                        <a
+                            href="http://localhost:3001/"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Home
+                        </a>
                         <button
-                            onClick={handleLogout} // Hook up our logout function
+                            onClick={handleLogout}
                             className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
                             Logout
                         </button>
                     </div>

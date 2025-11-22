@@ -16,18 +16,12 @@ if (Astro.cookies) {
   <title>Logging out...</title>
 </head>
 <body>
-  <script>
-    // Clear localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      localStorage.removeItem('userToken');
-      localStorage.removeItem('user');
-    }
-
-    // Redirect to main site
-    window.location.href = 'http://localhost:3001/';
+  <script is:inline>
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('user');
+    window.location.replace('http://localhost:3001/');
   </script>
-  <p>Logging out... Redirecting to <a href="http://localhost:3001/">Prestige Rentals</a>...</p>
 </body>
 </html>

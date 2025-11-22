@@ -277,59 +277,46 @@ car_rental_website/
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
+| Requirement | macOS | Windows |
+|-------------|-------|---------|
+| **Node.js** (v18+) | [Download](https://nodejs.org/) | [Download](https://nodejs.org/) |
+| **MySQL Server** | MAMP | XAMPP or MySQL Installer |
+| **Database Tool** | MySQL Workbench | MySQL Workbench |
 
-1. **Node.js** (v18 or higher)
-   📥 [Download Node.js](https://nodejs.org/en/download)
-   ⚠️ **Restart your system after installation**
-
-2. **MAMP** (for MySQL server)
-   📥 [Download MAMP](https://www.mamp.info/en/downloads/)
-
-3. **MySQL Workbench** (for database setup)
-   📥 [Download MySQL Workbench](https://dev.mysql.com/downloads/workbench/)
-
-4. **Visual Studio Code** (optional, for code editing)
-   📥 [Download VS Code](https://code.visualstudio.com/download)
+> ⚠️ **Restart your system after installing Node.js**
 
 ---
+
+## 🍎 macOS Setup (MAMP)
 
 ### Step 1: Database Setup
 
 1. **Start MAMP**
    - Launch MAMP application
-   - Ensure MySQL is running on port **8889**
-   - Web Server port: **80** (for legacy PHP app, optional)
+   - Go to Preferences → Ports → Set MySQL to **8889**
+   - Click "Start Servers"
 
 2. **Create Database**
    - Open **MySQL Workbench**
-   - Connect to localhost:8889 (username: `root`, password: `root`)
+   - Create new connection: `localhost:8889` (user: `root`, password: `root`)
    - Create new schema: `car_rental_db`
 
 3. **Import SQL Schema**
-   - Open the SQL file: `/car_rental/SQL_code.txt`
-   - Copy all **1,338 lines** of SQL code
-   - Execute in MySQL Workbench against `car_rental_db`
-   - This creates all 19 tables with sample data
-
----
+   - Open file: `/car_rental/SQL_code.txt`
+   - Execute all SQL in MySQL Workbench
+   - This creates 19 tables with sample data
 
 ### Step 2: Environment Configuration
 
-Create a `.env` file in the project root (if not exists) with the following:
+The `.env` file should already exist. If not, create it in project root:
 
 ```env
-# Database Configuration
 DB_HOST=localhost
 DB_PORT=8889
 DB_USER=root
 DB_PASSWORD=root
 DB_NAME=car_rental_db
-
-# Server Configuration
 PORT=3001
-
-# JWT Configuration
 JWT_SECRET=fb27cab2a5a28dbb41e9aae5e52df8161dac3b2017a65229c01aaeb7935dd4f8
 JWT_EXPIRES_IN=2h
 COOKIE_NAME=jwt_token
@@ -337,44 +324,75 @@ COOKIE_NAME=jwt_token
 
 ---
 
-### Step 3: Install Dependencies
+## 🪟 Windows Setup (XAMPP)
 
-#### For Express Backend (Port 3001)
+### Step 1: MySQL Port Configuration
 
-```bash
-# Navigate to server directory
-cd car_rental_website/server
+**Option A: Change XAMPP port to 8889 (Recommended)**
 
-# Install all dependencies
-npm install
+1. Open XAMPP Control Panel
+2. Click "Config" next to MySQL → "my.ini"
+3. Find `port=3306` and change to `port=8889`
+4. Save and restart MySQL
 
-# Packages installed:
-# - express, ejs, mysql2, bcrypt, jsonwebtoken
-# - helmet, cors, express-rate-limit, multer, dotenv
+**Option B: Use default port 3306**
+
+If you prefer to keep port 3306, update `.env`:
+```env
+DB_PORT=3306
+DB_PASSWORD=     # XAMPP default is empty password
 ```
 
-#### For Astro Frontend (Port 4321)
+### Step 2: Database Setup
+
+1. **Start XAMPP** and click "Start" for MySQL
+2. Open **MySQL Workbench** or phpMyAdmin (`http://localhost/phpmyadmin`)
+3. Create database: `car_rental_db`
+4. Import `/car_rental/SQL_code.txt`
+
+### Step 3: bcrypt Installation Issue (Windows)
+
+If `npm install` fails with bcrypt errors:
 
 ```bash
-# Navigate to project root
-cd car_rental_website
+# Option 1: Install build tools (requires admin)
+npm install --global windows-build-tools
 
-# Install all dependencies
-npm install
+# Option 2: Use bcryptjs instead (easier)
+cd server
+npm uninstall bcrypt
+npm install bcryptjs
+```
 
-# Packages installed:
-# - astro, react, react-dom, @astrojs/react, @astrojs/tailwind
-# - tailwind css, chart.js, framer-motion, react-router-dom
-# - jspdf, html2canvas, fontawesome
+Then update `server/index.js` line 19:
+```javascript
+// Change this:
+const bcrypt = require('bcrypt');
+// To this:
+const bcrypt = require('bcryptjs');
 ```
 
 ---
 
-### Step 4: Start Applications
+## 📦 Install Dependencies (Both Platforms)
 
-You need **TWO command prompts/terminals** running simultaneously:
+```bash
+# Terminal 1: Install server dependencies
+cd car_rental_website/server
+npm install
 
-#### Terminal 1: Express Backend
+# Terminal 2: Install frontend dependencies
+cd car_rental_website
+npm install
+```
+
+---
+
+## 🚀 Start Applications
+
+You need **TWO terminals** running simultaneously:
+
+### Terminal 1: Express Backend (Port 3001)
 
 ```bash
 cd car_rental_website/server
@@ -387,7 +405,7 @@ Server running on http://localhost:3001
 MySQL database connected successfully!
 ```
 
-#### Terminal 2: Astro Frontend
+### Terminal 2: Astro Frontend (Port 4321)
 
 ```bash
 cd car_rental_website
@@ -396,35 +414,29 @@ npm run dev
 
 **Expected Output:**
 ```
-🚀 astro v5.15.1 started in XXXms
-
-  ┃ Local    http://localhost:4321/
-  ┃ Network  use --host to expose
+astro v5.15.1 started
+Local: http://localhost:4321/
 ```
 
 ---
 
-### Step 5: Access the Application
+## 🔐 Access the Application
 
-1. **Visit the Public Website**
-   Open browser: **http://localhost:3001/**
-   Browse cars, read blog, explore services
+| URL | Description |
+|-----|-------------|
+| `http://localhost:3001/` | Public Website |
+| `http://localhost:4321/login` | Login Page |
+| `http://localhost:4321/customer/dashboard` | Customer Dashboard |
+| `http://localhost:4321/admin/dashboard` | Admin Dashboard |
 
-2. **Login to Dashboard**
-   Open browser: **http://localhost:4321/login**
+### Default Login Credentials
 
-   **Employee/Admin Login:**
-   - Username: `user`
-   - Password: `user`
-   - ⚠️ **Change password immediately after first login!**
+**Admin/Employee:**
+- Username: `user`
+- Password: `user`
 
-   **Customer Login:**
-   - Click "Sign Up" to create a new account
-   - Use your email and password to login
-
-3. **Access Dashboards**
-   - **Customer:** http://localhost:4321/customer/dashboard
-   - **Admin:** http://localhost:4321/admin/dashboard
+**Customer:**
+- Register a new account via Sign Up
 
 ---
 
@@ -477,226 +489,21 @@ The system uses a **comprehensive 19-table MySQL database** (`car_rental_db`):
 
 ## 🔌 API Documentation
 
-The Express backend provides a comprehensive RESTful API on **port 3001**.
+Complete REST API documentation is available in a separate file:
 
-### Base URL
+**[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
 
-```
-http://localhost:3001/api
-```
+### Quick Reference
 
-### Authentication
+| Base URL | `http://localhost:3001/api` |
+|----------|----------------------------|
+| Auth Header | `Authorization: Bearer <jwt_token>` |
 
-All protected endpoints require a JWT token:
+### Endpoint Categories
 
-```http
-Authorization: Bearer <jwt_token>
-```
-
----
-
-### Public Endpoints (No Auth)
-
-#### Cars & Inventory
-
-```http
-GET /api/public/featured-cars
-GET /api/car-types
-GET /api/features
-GET /api/addons
-```
-
-#### Blog
-
-```http
-GET /api/public/blog-posts          # Published posts only
-GET /api/public/blog-posts/:slug    # Single post by slug
-GET /api/public/blog-categories     # All categories
-```
-
-#### Testimonials
-
-```http
-GET /api/public/testimonials        # Customer testimonials
-```
-
-#### Contact
-
-```http
-POST /api/contact                   # Submit contact form
-Body: { name, email, subject, message }
-```
-
----
-
-### Authentication Endpoints (Rate Limited)
-
-```http
-POST /api/employees/login
-Body: { username, password }
-Response: { success, token, user }
-Rate Limit: 10 requests per 15 minutes
-
-POST /api/customers/login
-Body: { email, password }
-Response: { success, token, user }
-Rate Limit: 10 requests per 15 minutes
-
-POST /api/customers/register
-Body: { first_name, last_name, email, password }
-Response: { success, message }
-Rate Limit: 10 accounts per hour per IP
-
-POST /api/customers/forgot-password
-Body: { email }
-Response: { success, message }
-Rate Limit: 5 requests per hour per IP
-
-POST /api/customers/reset-password
-Body: { token, newPassword }
-Response: { success, message }
-Rate Limit: 5 requests per hour per IP
-```
-
----
-
-### Customer Endpoints (JWT Required)
-
-#### Profile Management
-
-```http
-GET /api/customers/profile              # Get customer profile
-PUT /api/customers/profile              # Update profile
-PUT /api/customers/password             # Change password
-```
-
-#### Car Browsing & Rental
-
-```http
-GET /api/cars/available                 # Browse available cars
-GET /api/cars/:id                       # Get car details
-
-POST /api/rentals/create                # Create rental booking
-Body: { car_id, start_date, return_date, addons[] }
-
-GET /api/customers/active-rental        # Get active rental
-GET /api/customers/rental-history       # Get rental history
-
-PUT /api/rentals/return-by-customer/:rentalId    # Return rental
-DELETE /api/rentals/:rentalId           # Cancel rental
-```
-
-#### Reviews
-
-```http
-GET /api/customers/can-review/:carId    # Check if can review
-POST /api/reviews                       # Create review
-Body: { car_id, rating, review_text }
-
-PUT /api/reviews/:reviewId              # Update review
-DELETE /api/reviews/:reviewId           # Delete review
-```
-
-#### Favorites
-
-```http
-GET /api/customers/favorites            # Get favorite cars
-POST /api/customers/favorites           # Add to favorites
-Body: { car_id }
-
-DELETE /api/customers/favorites/:car_id # Remove from favorites
-```
-
-#### Payment Methods
-
-```http
-GET /api/customers/payment-methods      # Get saved payment methods
-POST /api/customers/payment-methods     # Add payment method
-DELETE /api/customers/payment-methods/:methodId  # Remove method
-```
-
----
-
-### Admin Endpoints (Employee JWT Required)
-
-#### Dashboard & Analytics
-
-```http
-GET /api/admin/dashboard/metrics        # Dashboard summary
-Response: { totalRevenue, activeRentals, totalCars, totalCustomers, ... }
-
-GET /api/admin/metrics/revenue-by-month # Monthly revenue chart data
-GET /api/admin/metrics/popular-car-types # Car type popularity
-```
-
-#### Employee Management
-
-```http
-GET /api/admin/employees                # List all employees
-POST /api/admin/employees               # Create employee
-PUT /api/admin/employees/:id            # Update employee
-DELETE /api/admin/employees/:id         # Delete employee
-```
-
-#### Customer Management
-
-```http
-GET /api/admin/customers                # List all customers
-PUT /api/admin/customers/:id            # Update customer
-DELETE /api/admin/customers/:id         # Delete customer
-```
-
-#### Car Management
-
-```http
-GET /api/admin/cars                     # List all cars
-POST /api/admin/cars                    # Create car (with file upload)
-PUT /api/admin/cars/:id                 # Update car
-DELETE /api/admin/cars/:id              # Delete car
-POST /api/admin/cars/:carId/features    # Assign features to car
-```
-
-#### Rental Management
-
-```http
-GET /api/admin/rentals                  # List all rentals (with filters)
-PUT /api/admin/rentals/return/:rental_id # Process rental return
-```
-
-#### Maintenance Management
-
-```http
-GET /api/admin/maintenance/active       # Active maintenance records
-GET /api/admin/maintenance/history/:carId # Maintenance history for car
-POST /api/admin/maintenance             # Create maintenance record
-PUT /api/admin/maintenance/complete/:maintenance_id  # Complete maintenance
-PUT /api/admin/maintenance/:maintenance_id  # Update maintenance
-```
-
-#### Blog Management (CMS)
-
-```http
-GET /api/admin/blog                     # List all posts (including drafts)
-GET /api/admin/blog/:id                 # Get single post
-POST /api/admin/blog                    # Create post
-PUT /api/admin/blog/:id                 # Update post
-DELETE /api/admin/blog/:id              # Delete post
-PUT /api/admin/blog/:id/publish         # Publish/unpublish post
-GET /api/admin/blog-categories          # Get categories
-POST /api/admin/blog/upload-image       # Upload blog image (multipart/form-data)
-```
-
-#### Contact Messages
-
-```http
-GET /api/admin/contact-messages         # List messages (with status filter)
-Query: ?status=unread&page=1&limit=20
-
-PUT /api/admin/contact-messages/:id/status  # Update message status
-Body: { status: 'read' | 'unread' | 'archived' }
-
-DELETE /api/admin/contact-messages/:id  # Delete message
-```
+- **Public** - Cars, Blog, Testimonials, Contact
+- **Customer** - Profile, Rentals, Reviews, Favorites
+- **Admin** - Dashboard, Cars, Customers, Employees, Blog CMS
 
 ---
 

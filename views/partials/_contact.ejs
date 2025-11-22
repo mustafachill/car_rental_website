@@ -154,10 +154,47 @@
       </div>
       <div class="row justify-content-center">
           <div class="col-md-12">
-              <div id="map" style="width: 100%; height: 500px; position: relative; overflow: hidden;">
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d443077.8534449555!2d-95.6886790010998!3d29.819665656777623!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640b419fb939547%3A0x8dcc20a8eddbcaf4!2sAvis%20Car%20Rental!5e0!3m2!1str!2sus!4v1763290362447!5m2!1str!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-              </div>
+              <div id="contactMap" style="width: 100%; height: 450px; border-radius: 8px; z-index: 1;"></div>
           </div>
       </div>
     </div>
   </section>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Houston, TX - 5555 Westheimer Road coordinates (near The Galleria)
+      var lat = 29.7382;
+      var lng = -95.4610;
+
+      // Initialize the map
+      var map = L.map('contactMap', {
+        attributionControl: false
+      }).setView([lat, lng], 15);
+
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      // Custom marker icon
+      var customIcon = L.divIcon({
+        className: 'custom-map-marker',
+        html: '<div style="background-color: #1089ff; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30]
+      });
+
+      // Add marker
+      var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
+
+      // Add popup
+      marker.bindPopup('<strong>Prestige Rentals</strong><br>5555 Westheimer Road<br>Suite 200<br>Houston, TX 77056').openPopup();
+    });
+  </script>

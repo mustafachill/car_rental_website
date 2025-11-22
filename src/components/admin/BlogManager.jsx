@@ -312,6 +312,24 @@ export default function BlogManagerPage() {
     const handleOpenModal = (type, post = null) => setModalState({ type, post });
     const handleCloseModal = () => setModalState({ type: null, post: null });
 
+    // Fetch full post data before opening edit modal (includes content and category_ids)
+    const handleEdit = async (postId) => {
+        try {
+            setLoading(true);
+            const data = await adminApiGet(`http://localhost:3001/api/admin/blog/${postId}`);
+            if (data.success) {
+                setModalState({ type: 'form', post: data.post });
+            } else {
+                alert(data.error || 'Failed to fetch blog post details');
+            }
+        } catch (err) {
+            console.error('Error fetching post:', err);
+            alert('Error loading blog post for editing');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleDelete = async (postId) => {
         if (!window.confirm("Are you sure you want to delete this blog post? This action cannot be undone.")) return;
 
@@ -369,7 +387,7 @@ export default function BlogManagerPage() {
             ) : (
                 <BlogTable
                     posts={posts}
-                    onEdit={(post) => handleOpenModal('form', post)}
+                    onEdit={(post) => handleEdit(post.post_id)}
                     onDelete={handleDelete}
                     onTogglePublish={handleTogglePublish}
                 />

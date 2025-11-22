@@ -304,13 +304,37 @@
   });
 
   $('.popup-youtube, .popup-vimeo, .popup-gmaps').magnificPopup({
-    disableOn: 700,
     type: 'iframe',
     mainClass: 'mfp-fade',
     removalDelay: 160,
     preloader: false,
-
-    fixedContentPos: false
+    fixedContentPos: true,
+    iframe: {
+      markup: '<div class="mfp-iframe-scaler">'+
+              '<div class="mfp-close"></div>'+
+              '<iframe class="mfp-iframe" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>'+
+              '</div>',
+      patterns: {
+        youtube: {
+          index: 'youtube.com/',
+          id: 'v=',
+          src: 'https://www.youtube-nocookie.com/embed/%id%?autoplay=1&rel=0'
+        },
+        youtube_short: {
+          index: 'youtu.be/',
+          id: function(url) {
+            var m = url.match(/youtu\.be\/([^?]+)/);
+            return m ? m[1] : null;
+          },
+          src: 'https://www.youtube-nocookie.com/embed/%id%?autoplay=1&rel=0'
+        },
+        vimeo: {
+          index: 'vimeo.com/',
+          id: '/',
+          src: 'https://player.vimeo.com/video/%id%?autoplay=1'
+        }
+      }
+    }
   });
 
 

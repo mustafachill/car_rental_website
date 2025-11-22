@@ -1,5 +1,11 @@
 <section class="ftco-section bg-light">
   <div class="container">
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-12 text-center heading-section ftco-animate">
+        <span class="subheading">Our Blog</span>
+        <h2 class="mb-3">Latest News & Articles</h2>
+      </div>
+    </div>
     <div class="row">
       <% if (typeof blogs !== 'undefined' && blogs.length > 0) { %>
         <% blogs.forEach(function(blog) { %>
@@ -32,6 +38,15 @@
         </div>
       <% } %>
     </div>
+
+    <!-- View All Blogs Button (only show on homepage, not on blog listing page) -->
+    <% if (typeof totalPages === 'undefined') { %>
+    <div class="row mt-4">
+      <div class="col-12 text-center">
+        <a href="/blog" class="btn btn-primary py-3 px-5">View All Blog Posts</a>
+      </div>
+    </div>
+    <% } %>
 
     <!-- Pagination -->
     <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>

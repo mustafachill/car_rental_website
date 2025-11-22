@@ -17,8 +17,8 @@ export default function LoginForm() {
     const tabButtonStyles = (isActive) =>
         `w-1/2 py-4 text-center font-semibold rounded-t-lg transition-all duration-300 focus:outline-none ${
         isActive
-            ? 'bg-white dark:bg-gray-800 text-blue-600'
-            : 'bg-transparent text-gray-500 hover:text-blue-500'
+            ? 'bg-white dark:bg-gray-800 text-prestige-blue'
+            : 'bg-transparent text-gray-500 hover:text-prestige-blue hover:opacity-90'
         }`;
 
     const formContainerVariants = {
@@ -28,13 +28,16 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 font-inter p-4">
-            <div className="w-full max-w-md">
+        <div className="w-full max-w-md mx-auto">
+            <div className="w-full">
                 {/* Logo/Header */}
-                <div className="text-center mb-6">
-                    <h1 className="text-5xl text-gray-800 dark:text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-                        Prestige Rentals
+                <div className="text-center mb-4 sm:mb-6">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl text-prestige-dark dark:text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                        Prestige<span className="text-prestige-green">Rentals</span>
                     </h1>
+                    <p className="text-prestige-gray dark:text-gray-400 mt-2 text-sm sm:text-base">
+                        Login or create an account to continue.
+                    </p>
                 </div>
 
                 {/* Form Container */}
@@ -49,7 +52,7 @@ export default function LoginForm() {
                         </button>
                     </div>
 
-                    <div className="p-8 min-h-[450px]">
+                    <div className="p-4 sm:p-6 md:p-8 min-h-[400px] sm:min-h-[450px]">
                         <AnimatePresence mode="wait">
                             {error && (
                                 <motion.p
@@ -100,14 +103,14 @@ function CustomerForm({ setError, setMessage }) {
             <div className="flex justify-center mb-8">
                 <div className="relative inline-flex bg-gray-100 dark:bg-gray-900 rounded-full p-1">
                     <div
-                        className={`absolute top-1 bottom-1 w-[calc(50%-0.25rem)] bg-blue-600 rounded-full shadow-md transition-transform duration-300 ease-out ${
+                        className={`absolute top-1 bottom-1 w-[calc(50%-0.25rem)] bg-prestige-blue rounded-full shadow-md transition-transform duration-300 ease-out ${
                         isLoginView ? 'translate-x-1' : 'translate-x-[calc(100%-0.25rem)]'
                         }`}
                     />
-                    <button onClick={() => setLoginView(true)} className={`relative w-24 py-2 text-sm font-bold rounded-full transition-colors z-10 ${isLoginView ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                    <button onClick={() => setLoginView(true)} className={`relative w-24 py-2 text-sm font-bold rounded-full transition-colors z-10 ${isLoginView ? 'text-white' : 'text-prestige-gray dark:text-gray-300'}`}>
                         Sign In
                     </button>
-                    <button onClick={() => setLoginView(false)} className={`relative w-24 py-2 text-sm font-bold rounded-full transition-colors z-10 ${!isLoginView ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                    <button onClick={() => setLoginView(false)} className={`relative w-24 py-2 text-sm font-bold rounded-full transition-colors z-10 ${!isLoginView ? 'text-white' : 'text-prestige-gray dark:text-gray-300'}`}>
                         Sign Up
                     </button>
                 </div>
@@ -195,13 +198,13 @@ function CustomerLoginForm({ setError }) {
             </h2>
             <div className="space-y-4">
                 <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Email Address"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
                 <input type="password" name="password" value={formData.password} onChange={handleChange} required placeholder="Password"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
             </div>
-            <a href="/reset-password" className="text-sm text-blue-600 hover:underline block text-right">Forgot Password?</a>
+            <a href="/reset-password" className="text-sm text-prestige-blue hover:underline block text-right">Forgot Password?</a>
             <button type="submit" disabled={isLoading}
-                className="w-full bg-gray-800 text-white dark:bg-blue-600 font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-60">
+                className="w-full bg-prestige-blue text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-60">
                 {isLoading ? 'Signing In…' : 'Sign In'}
             </button>
         </form>
@@ -251,18 +254,18 @@ function CustomerRegisterForm({ setError, setMessage, setLoginView }) {
             </h2>
             <div className="flex gap-4">
                 <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="First Name"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
                 <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Last Name"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
             </div>
             <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Email Address"
-                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
             <input type="password" name="password" value={formData.password} onChange={handleChange} required placeholder="Password"
-                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
             <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required placeholder="Confirm Password"
-                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-5G00 transition" />
+                className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
             <button type="submit" disabled={isLoading}
-                className="w-full bg-gray-800 text-white dark:bg-blue-600 font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-60">
+                className="w-full bg-prestige-blue text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-60">
                 {isLoading ? 'Creating Account…' : 'Create Account'}
             </button>
         </form>
@@ -310,12 +313,12 @@ function EmployeeForm({ setError }) {
             </h2>
             <div className="space-y-4">
                 <input type="text" name="username" value={formData.username} onChange={handleChange} required placeholder="Username"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
                 <input type="password" name="password" value={formData.password} onChange={handleChange} required placeholder="Password"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-prestige-blue transition" />
             </div>
             <button type="submit" disabled={isLoading}
-                className="w-full bg-gray-800 text-white dark:bg-blue-600 font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-60">
+                className="w-full bg-prestige-blue text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-60">
                 {isLoading ? 'Signing In…' : 'Sign In'}
             </button>
         </form>
